@@ -1,0 +1,16 @@
+{
+  "name": "Tontine bɔkun - Tontine 2.0 Africa",
+  "short_name": "Tontine bɔkun",
+  "description": "Plateforme de gestion de tontines 100% hors-ligne et transparente.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#f59e0b",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

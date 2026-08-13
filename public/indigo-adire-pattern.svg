@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="indigoCenter" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a122e" />
+      <stop offset="30%" stop-color="#162963" />
+      <stop offset="60%" stop-color="#2d4ea3" />
+      <stop offset="85%" stop-color="#60a5fa" />
+      <stop offset="100%" stop-color="#0a122e" />
+    </radialGradient>
+  </defs>
+
+  <rect width="200" height="200" fill="#090f26" />
+
+  <!-- Motif Cercle 1 (Haut Gauche) -->
+  <g transform="translate(50, 50)">
+    <circle cx="0" cy="0" r="42" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2" />
+    <circle cx="0" cy="0" r="35" fill="none" stroke="rgba(96, 165, 250, 0.25)" stroke-width="4" stroke-dasharray="3 3" />
+    <circle cx="0" cy="0" r="26" fill="none" stroke="rgba(255, 255, 255, 0.35)" stroke-width="3" stroke-dasharray="2 4" />
+    <circle cx="0" cy="0" r="16" fill="none" stroke="rgba(255, 204, 0, 0.4)" stroke-width="2" />
+    <circle cx="0" cy="0" r="8" fill="#090f26" />
+    <!-- Rayons soleil tie-dye -->
+    <path d="M 0,-40 L 0,40 M -40,0 L 40,0 M -28,-28 L 28,28 M -28,28 L 28,-28" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5" />
+  </g>
+
+  <!-- Motif Cercle 2 (Haut Droite) -->
+  <g transform="translate(150, 50)">
+    <circle cx="0" cy="0" r="42" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2" />
+    <circle cx="0" cy="0" r="35" fill="none" stroke="rgba(96, 165, 250, 0.25)" stroke-width="4" stroke-dasharray="3 3" />
+    <circle cx="0" cy="0" r="26" fill="none" stroke="rgba(255, 255, 255, 0.35)" stroke-width="3" stroke-dasharray="2 4" />
+    <circle cx="0" cy="0" r="16" fill="none" stroke="rgba(16, 185, 129, 0.4)" stroke-width="2" />
+    <circle cx="0" cy="0" r="8" fill="#090f26" />
+    <path d="M 0,-40 L 0,40 M -40,0 L 40,0 M -28,-28 L 28,28 M -28,28 L 28,-28" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5" />
+  </g>
+
+  <!-- Motif Cercle 3 (Bas Gauche) -->
+  <g transform="translate(50, 150)">
+    <circle cx="0" cy="0" r="42" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2" />
+    <circle cx="0" cy="0" r="35" fill="none" stroke="rgba(96, 165, 250, 0.25)" stroke-width="4" stroke-dasharray="3 3" />
+    <circle cx="0" cy="0" r="26" fill="none" stroke="rgba(255, 255, 255, 0.35)" stroke-width="3" stroke-dasharray="2 4" />
+    <circle cx="0" cy="0" r="16" fill="none" stroke="rgba(16, 185, 129, 0.4)" stroke-width="2" />
+    <circle cx="0" cy="0" r="8" fill="#090f26" />
+    <path d="M 0,-40 L 0,40 M -40,0 L 40,0 M -28,-28 L 28,28 M -28,28 L 28,-28" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5" />
+  </g>
+
+  <!-- Motif Cercle 4 (Bas Droite) -->
+  <g transform="translate(150, 150)">
+    <circle cx="0" cy="0" r="42" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2" />
+    <circle cx="0" cy="0" r="35" fill="none" stroke="rgba(96, 165, 250, 0.25)" stroke-width="4" stroke-dasharray="3 3" />
+    <circle cx="0" cy="0" r="26" fill="none" stroke="rgba(255, 255, 255, 0.35)" stroke-width="3" stroke-dasharray="2 4" />
+    <circle cx="0" cy="0" r="16" fill="none" stroke="rgba(255, 204, 0, 0.4)" stroke-width="2" />
+    <circle cx="0" cy="0" r="8" fill="#090f26" />
+    <path d="M 0,-40 L 0,40 M -40,0 L 40,0 M -28,-28 L 28,28 M -28,28 L 28,-28" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5" />
+  </g>
+</svg>
