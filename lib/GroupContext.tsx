@@ -30,6 +30,7 @@ interface GroupContextType {
   approveJoinRequest: (requestId: string) => void;
   rejectJoinRequest: (requestId: string) => void;
   scheduleMeeting: (groupId: string, date: string, location: string, beneficiaryId: string, beneficiaryName: string, notes?: string) => void;
+  updateContributionStatus: (groupId: string, meetingId: string, memberId: string, status: "paid" | "pending" | "late") => void;
 }
 
 const INITIAL_REQUESTS: JoinRequest[] = [
@@ -156,7 +157,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Vérifier si le membre est bloqué pour dette non payée ailleurs
     const existingRep = MOCK_REPUTATIONS.find(
-      (r) => r.phone === phone || r.email.toLowerCase() === email.toLowerCase()
+      (r) => r.identity.phone === phone || r.identity.email?.toLowerCase() === email.toLowerCase()
     );
 
     if (existingRep && isMemberBlockedGlobally(existingRep.memberId)) {
@@ -266,6 +267,43 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     toast.success(`📅 Prochaine réunion programmée pour le ${date} !`);
   };
 
+  const updateContributionStatus = (
+    groupId: string,
+    meetingId: string,
+    memberId: string,
+    status: "paid" | "pending" | "late"
+  ) => {
+    setGroups((prevGroups) =>
+      prevGroups.map((g) => {
+        if (g.id === groupId) {
+          return {
+            ...g,
+            meetings: g.meetings.map((m) => {
+              if (m.id === meetingId) {
+                return {
+                  ...m,
+                  contributions: m.contributions.map((c) => {
+                    if (c.memberId === memberId) {
+                      return {
+                        ...c,
+                        status,
+                        paidAt: status === "paid" ? new Date().toLocaleDateString("fr-FR") : undefined,
+                      };
+                    }
+                    return c;
+                  }),
+                };
+              }
+              return m;
+            }),
+          };
+        }
+        return g;
+      })
+    );
+    toast.success("Statut de la cotisation mis à jour !");
+  };
+
   return (
     <GroupContext.Provider
       value={{
@@ -279,6 +317,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         approveJoinRequest,
         rejectJoinRequest,
         scheduleMeeting,
+        updateContributionStatus,
       }}
     >
       {children}

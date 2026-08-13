@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { User, Phone, Mail, CreditCard, X, ShieldAlert, Send } from "lucide-react";
+import { User, Phone, Mail, CreditCard, X, ShieldAlert, Send, ShieldCheck } from "lucide-react";
 import { useGroups } from "@/lib/GroupContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import { TontineGroup } from "@/lib/mockData";

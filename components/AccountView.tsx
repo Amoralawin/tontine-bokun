@@ -288,7 +288,7 @@ export const AccountView: React.FC = () => {
                   <button
                     key={g}
                     type="button"
-                    onClick={() => toggleGroup(g)}
+                    onClick={() => handleToggleGroup(g)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                       isSelected
                         ? "bg-emerald-500 text-white border-emerald-500 shadow-sm"

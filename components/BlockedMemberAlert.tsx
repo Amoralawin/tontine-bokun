@@ -2,7 +2,7 @@
 
 import React from "react";
 import { AlertTriangle, XCircle, Clock, CreditCard } from "lucide-react";
-import { MemberReputation, PenaltyRecord, formatCurrency as fc } from "@/lib/reputationSystem";
+import { MemberReputation, PenaltyRecord } from "@/lib/reputationSystem";
 
 // Simple currency formatter
 function fmt(n: number) {
