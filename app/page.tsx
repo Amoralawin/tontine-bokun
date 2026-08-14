@@ -212,7 +212,7 @@ export default function Home() {
         {activeTab === "dashboard" && <DashboardView />}
 
         {/* OWNER & REVENUE TAB */}
-        {activeTab === "owner" && <OwnerDashboardView />}
+        {activeTab === "owner" && <OwnerDashboardView onClose={() => setActiveTab("dashboard")} />}
 
         {/* REPUTATION TAB */}
         {activeTab === "reputation" && <ReputationDashboard />}

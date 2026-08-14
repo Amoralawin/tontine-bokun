@@ -57,16 +57,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
   React.useEffect(() => {
     setMounted(true);
 
-    // Vérifier si l'appareil a le droit d'afficher l'espace propriétaire
+    // Nettoyer tout ancien flag persistant
     if (typeof window !== "undefined") {
+      localStorage.removeItem("tontine_is_owner_device");
       const params = new URLSearchParams(window.location.search);
       if (params.get("owner") === "1604" || params.get("admin") === "1604") {
-        localStorage.setItem("tontine_is_owner_device", "true");
-        setIsOwnerDevice(true);
         setActiveTab("owner");
-      } else {
-        const isOwner = localStorage.getItem("tontine_is_owner_device") === "true";
-        setIsOwnerDevice(isOwner);
       }
     }
 
@@ -138,14 +134,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
   const handleUnlockOwnerDevice = (e: React.FormEvent) => {
     e.preventDefault();
     if (secretPinInput === "1604") {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("tontine_is_owner_device", "true");
-      }
-      setIsOwnerDevice(true);
       setShowSecretPinModal(false);
       setSecretPinInput("");
       setActiveTab("owner");
-      toast.success("👑 Espace Propriétaire activé sur cet appareil !");
+      toast.success("👑 Espace Propriétaire déverrouillé !");
     } else {
       toast.error("Code PIN incorrect.");
       setSecretPinInput("");
@@ -154,7 +146,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
   const navItems = [
     { id: "dashboard", label: t("dashboard"), icon: LayoutDashboard },
-    ...(isOwnerDevice ? [{ id: "owner", label: "👑 Espace Propriétaire", icon: Crown }] : []),
     { id: "groups", label: t("groupsTab"), icon: Building2 },
     ...(canSeeReputation ? [{ id: "reputation", label: t("reputationTab"), icon: ShieldAlert }] : []),
     ...(canSeeMembers ? [{ id: "account", label: t("accountTab"), icon: Users }] : []),

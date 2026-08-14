@@ -22,7 +22,11 @@ interface WithdrawalHistory {
   reference: string;
 }
 
-export const OwnerDashboardView: React.FC = () => {
+interface OwnerDashboardViewProps {
+  onClose?: () => void;
+}
+
+export const OwnerDashboardView: React.FC<OwnerDashboardViewProps> = ({ onClose }) => {
   const { t } = useLanguage();
   const { groups } = useGroups();
 
@@ -209,12 +213,23 @@ export const OwnerDashboardView: React.FC = () => {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full py-3.5 rounded-2xl btn-mango-gold text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02]"
-          >
-            Déverrouiller mon Espace
-          </button>
+          <div className="flex gap-2">
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                ← Retour
+              </button>
+            )}
+            <button
+              type="submit"
+              className="flex-1 py-3.5 rounded-2xl btn-mango-gold text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02]"
+            >
+              Déverrouiller
+            </button>
+          </div>
         </form>
       </div>
     );
@@ -228,7 +243,7 @@ export const OwnerDashboardView: React.FC = () => {
         <div className="absolute right-0 top-0 w-80 h-80 bg-amber-400/15 rounded-full blur-3xl" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-xl">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-amber-200 text-xs font-black uppercase tracking-wider">
                 <Crown className="w-4 h-4 text-yellow-300" />
                 <span>Espace Propriétaire & Fondateur</span>
@@ -240,18 +255,14 @@ export const OwnerDashboardView: React.FC = () => {
               >
                 🔒 Verrouiller
               </button>
-              <button
-                onClick={() => {
-                  if (typeof window !== "undefined") {
-                    localStorage.removeItem("tontine_is_owner_device");
-                    window.location.href = "/";
-                  }
-                }}
-                className="px-2.5 py-1 rounded-full bg-black/40 hover:bg-black/60 text-slate-200 text-[10px] font-bold transition-colors flex items-center gap-1 border border-white/20"
-                title="Masquer complètement l'onglet de cet appareil"
-              >
-                👁️ Masquer de cet appareil
-              </button>
+              {onClose && (
+                <button
+                  onClick={onClose}
+                  className="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-[10px] font-bold transition-colors flex items-center gap-1 border border-white/20"
+                >
+                  ← Retour au Menu Principal
+                </button>
+              )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
               Tableau de Bord & Encaissements Plateforme
