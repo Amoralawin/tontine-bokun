@@ -348,23 +348,34 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
             <div className="text-xs text-slate-600 dark:text-slate-300 space-y-3 font-medium">
               <p>Vous pouvez ajouter <strong>Tontine bɔkun</strong> sur l&apos;écran d&apos;accueil de votre appareil pour l&apos;utiliser comme une application native hors-ligne (PC, Android, iPhone, Tablette).</p>
               
+              <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 space-y-2">
+                <p className="font-bold text-blue-700 dark:text-blue-400">💻 Sur PC / Mac (Chrome / Edge) :</p>
+                <ol className="list-decimal list-inside space-y-1 pl-1">
+                  <li>Regardez dans la <strong>barre d&apos;adresse</strong> tout en haut à droite (à côté de l&apos;étoile).</li>
+                  <li>Cliquez sur l&apos;icône <strong>📥 Installer l&apos;application</strong>.</li>
+                  <li>Ou cliquez sur le menu <strong>(···)</strong> en haut à droite &gt; <strong>&quot;Applications&quot;</strong> &gt; <strong>&quot;Installer Tontine bɔkun&quot;</strong>.</li>
+                </ol>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+                <p className="font-bold text-emerald-700 dark:text-emerald-400">🤖 Sur Android (Chrome) :</p>
+                <ol className="list-decimal list-inside space-y-1 pl-1">
+                  <li>Appuyez sur les <strong>3 petits points</strong> en haut à droite du navigateur.</li>
+                  <li>Sélectionnez <strong>&quot;Installer l&apos;application&quot;</strong> ou <strong>&quot;Ajouter à l&apos;écran d&apos;accueil&quot;</strong>.</li>
+                </ol>
+              </div>
+
               <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2">
                 <p className="font-bold text-amber-700 dark:text-amber-400">📱 Sur iPhone / iPad (Safari) :</p>
                 <ol className="list-decimal list-inside space-y-1 pl-1">
                   <li>Appuyez sur le bouton de Partage <span className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-black">↑</span> en bas de l&apos;écran.</li>
                   <li>Faites défiler vers le bas et sélectionnez <span className="font-bold">&quot;Sur l&apos;écran d&apos;accueil&quot;</span>.</li>
-                  <li>Validez pour installer l&apos;icône sur votre téléphone.</li>
                 </ol>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 space-y-2">
-                <p className="font-bold text-blue-700 dark:text-blue-400">🤖 Sur Android (Chrome) / PC :</p>
-                <p>Cliquez sur les <span className="font-bold">3 petits points</span> du navigateur en haut à droite, puis sélectionnez <span className="font-bold">&quot;Installer l&apos;application&quot;</span> ou <span className="font-bold">&quot;Ajouter à l&apos;écran d&apos;accueil&quot;</span>.</p>
               </div>
             </div>
             <button
               onClick={() => setShowInstallTips(false)}
-              className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-colors"
+              className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-colors shadow-lg"
             >
               D&apos;accord, j&apos;ai compris
             </button>

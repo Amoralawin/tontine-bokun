@@ -64,27 +64,13 @@ const LanguageContextDefault: GroupContextType = {
   syncFromSupabase: async () => {},
 };
 
-const INITIAL_REQUESTS: JoinRequest[] = [
-  {
-    id: "req-1",
-    groupId: "group-1",
-    groupName: "Tontine des Mamans d'Abidjan",
-    memberName: "Mariam Traoré",
-    phone: "+225 07 88 99 00",
-    email: "mariam.traore@gmail.com",
-    momoNumber: "0788990011",
-    momoProvider: "Orange Money",
-    message: "Je souhaite rejoindre votre tontine pour le cycle 2. Je suis commerçante à Adjamé.",
-    status: "pending",
-    requestedAt: "03/08/2026",
-  },
-];
+const INITIAL_REQUESTS: JoinRequest[] = [];
 
 const GroupContext = createContext<GroupContextType | null>(null);
 
 export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [groups, setGroups] = useState<TontineGroup[]>(INITIAL_GROUPS);
-  const [activeGroupId, setActiveGroupId] = useState<string>(INITIAL_GROUPS[0].id);
+  const [activeGroupId, setActiveGroupId] = useState<string>(INITIAL_GROUPS[0]?.id || "");
   const [joinRequests, setJoinRequests] = useState<JoinRequest[]>(INITIAL_REQUESTS);
   const [isLoaded, setIsLoaded] = useState(false);
 

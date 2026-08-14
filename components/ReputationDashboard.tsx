@@ -160,11 +160,6 @@ export const ReputationDashboard: React.FC = () => {
           </button>
         </div>
 
-        <p className="text-[11px] text-slate-400">
-          💡 Essayez : <button className="underline text-amber-600" onClick={() => { setSearchPhone("+225 05 13 14 15"); }}>+225 05 13 14 15</button> (restreinte) ou{" "}
-          <button className="underline text-red-600" onClick={() => { setSearchPhone("+229 97 88 77 66"); }}>+229 97 88 77 66</button> (bloqué)
-        </p>
-
         {searchResult === "not_found" && (
           <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-sm font-medium flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5" />
