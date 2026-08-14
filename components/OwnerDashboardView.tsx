@@ -27,58 +27,26 @@ export const OwnerDashboardView: React.FC = () => {
   const { groups } = useGroups();
 
   const [activeSubTab, setActiveSubTab] = useState<"revenue" | "accounts" | "groups" | "withdraw">("revenue");
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return sessionStorage.getItem("tontine_owner_auth") === "true";
-    }
-    return false;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [pinInput, setPinInput] = useState("");
-  const [savedPin, setSavedPin] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("tontine_owner_pin") || "7788";
-    }
-    return "7788";
-  });
-  const [isChangingPin, setIsChangingPin] = useState(false);
-  const [newPinInput, setNewPinInput] = useState("");
+  const MASTER_PIN = "1604";
 
   const handleUnlock = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pinInput === savedPin || pinInput === "7788" || pinInput === "2026") {
+    const savedCustomPin = typeof window !== "undefined" ? localStorage.getItem("tontine_owner_pin") : null;
+    if (pinInput === MASTER_PIN || (savedCustomPin && pinInput === savedCustomPin)) {
       setIsAuthenticated(true);
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("tontine_owner_auth", "true");
-      }
       setPinInput("");
-      toast.success("Espace Propriétaire déverrouillé avec succès !");
+      toast.success("👑 Espace Propriétaire déverrouillé avec succès !");
     } else {
-      toast.error("Code PIN incorrect. Accès refusé.");
+      toast.error("❌ Code PIN incorrect. Accès refusé.");
       setPinInput("");
     }
   };
 
   const handleLock = () => {
     setIsAuthenticated(false);
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("tontine_owner_auth");
-    }
     toast.info("Session propriétaire verrouillée.");
-  };
-
-  const handleSaveNewPin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPinInput.length < 4) {
-      toast.error("Le code PIN doit contenir au moins 4 chiffres.");
-      return;
-    }
-    setSavedPin(newPinInput);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("tontine_owner_pin", newPinInput);
-    }
-    setIsChangingPin(false);
-    setNewPinInput("");
-    toast.success("Votre nouveau code PIN propriétaire a été enregistré avec succès !");
   };
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -234,8 +202,9 @@ export const OwnerDashboardView: React.FC = () => {
               type="password"
               value={pinInput}
               onChange={(e) => setPinInput(e.target.value)}
-              placeholder="Entrez votre PIN (Défaut : 7788)"
-              className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center text-lg font-black tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+              placeholder="••••"
+              maxLength={6}
+              className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center text-2xl font-black tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500/40"
               autoFocus
             />
           </div>
@@ -247,10 +216,6 @@ export const OwnerDashboardView: React.FC = () => {
             Déverrouiller mon Espace
           </button>
         </form>
-
-        <p className="text-[11px] text-slate-400">
-          💡 Code PIN secret par défaut : <strong className="text-amber-600 font-mono font-bold">7788</strong> (modifiable une fois connecté).
-        </p>
       </div>
     );
   }
