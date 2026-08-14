@@ -17,23 +17,61 @@ import { Calendar } from "lucide-react";
 import { MobileDashboardView } from "./MobileDashboardView";
 import { TabletDashboardView } from "./TabletDashboardView";
 
+const WELCOME_TRANSLATIONS: Record<string, Record<string, string>> = {
+  fr: {
+    title: "Bienvenue sur Tontine bɔkun !",
+    desc: "Vous n'êtes membre d'aucun groupe pour le moment. Vous pouvez créer votre propre groupe ou demander à en rejoindre un existant depuis l'onglet \"Groupes\".",
+    notice: "💡 La base de données en ligne est connectée ! Tous les groupes que vous créerez maintenant seront réels et enregistrés de manière sécurisée sur Supabase."
+  },
+  en: {
+    title: "Welcome to Tontine bɔkun!",
+    desc: "You are not a member of any group at the moment. You can create your own group or request to join an existing one from the \"Groups\" tab.",
+    notice: "💡 The online database is connected! All groups you create now will be real and securely saved on Supabase."
+  },
+  bci: {
+    title: "Mo wuo ba Tontine bɔkun!",
+    desc: "A nun fin akpasua fiɛ nun fine. A ko yi akpasua wun, o ko wlu nun akpasua kun lɔ.",
+    notice: "💡 Database su kpli wun fine! Akpasua mɔyo mun bo a ko yi o ko siesie kpa su Supabase."
+  },
+  fon: {
+    title: "Mǐ ɖo azɔ̌ Tontine bɔkun mɛ!",
+    desc: "A ko byɔ gbɛ́tán ɖě mɛ azɔ̌ lɔ mɛ lǎ. A sixu blo gbɛ́tán towe alɔyi.",
+    notice: "💡 Akwɛ jije towe sugan bi! Gbɛ́tán e blo towe ganji mɛ sugan bi Supabase."
+  },
+  gux: {
+    title: "Mǐ ɖo azɔ̌ Tontine bɔkun mɛ!",
+    desc: "A ko byɔ gbɛ́tán ɖě mɛ azɔ̌ lɔ mɛ lǎ. A sixu blo gbɛ́tán towe alɔyi.",
+    notice: "💡 Akwɛ jije towe sugan bi! Gbɛ́tán e blo towe ganji mɛ sugan bi Supabase."
+  },
+  ajg: {
+    title: "Wuleva ba Tontine bɔkun!",
+    desc: "Agbetan ma wlu gbɛ́ ɖe mɛ o. A wawa gbɛ́ yɔyɔ́ alokan si.",
+    notice: "💡 Ho kodo base bi te bi! Gbɛ́ ciwo yí a wawa wlán do Supabase."
+  }
+};
+
 export const DashboardView: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { canSeePenalties, isAdmin } = useUserRole();
   const { activeGroup: group } = useGroups();
   const [activeTab, setActiveTab] = useState<"overview" | "meeting" | "dues">("overview");
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
 
+  const wt = (key: string) => {
+    const dict = WELCOME_TRANSLATIONS[language] || WELCOME_TRANSLATIONS.fr;
+    return dict[key] || WELCOME_TRANSLATIONS.fr[key];
+  };
+
   if (!group) {
     return (
       <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-6 max-w-lg mx-auto shadow-md">
         <div className="text-5xl">👋🏿</div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white">Bienvenue sur Tontine bɔkun !</h2>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white">{wt("title")}</h2>
         <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-          Vous n&apos;êtes membre d&apos;aucun groupe pour le moment. Vous pouvez créer votre propre groupe ou demander à en rejoindre un existant depuis l&apos;onglet &quot;Groupes&quot;.
+          {wt("desc")}
         </p>
         <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">
-          💡 La base de données en ligne est connectée ! Tous les groupes que vous créerez maintenant seront réels et enregistrés de manière sécurisée sur Supabase.
+          {wt("notice")}
         </div>
       </div>
     );
