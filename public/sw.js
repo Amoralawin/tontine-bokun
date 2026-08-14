@@ -1,20 +1,22 @@
-const CACHE_NAME = "tontine-bokun-v2";
+const CACHE_NAME = "tontine-bokun-v3";
 const ASSETS_TO_CACHE = [
   "/",
   "/manifest.json",
+  "/icon-192.png",
+  "/icon-512.png"
 ];
 
-// Install event - Cache static assets
+// Install event - Force immediate activation
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  self.skipWaiting();
 });
 
-// Activate event - Clean old caches
+// Activate event - Purge all previous caches immediately
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -32,6 +34,21 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((res) => res || caches.match("/")))
+    );
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
@@ -43,14 +60,6 @@ self.addEventListener("fetch", (event) => {
         }
         return networkResponse;
       })
-      .catch(() => {
-        // Fallback to cache when offline
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          return caches.match("/");
-        });
-      })
+      .catch(() => caches.match(event.request))
   );
 });

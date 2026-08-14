@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import {
   LayoutDashboard, Users, ShieldAlert, Sparkles, Building2,
   Menu, X, Sun, Moon, ShieldCheck, ChevronRight, UserPlus,
-  Smartphone, Tablet, Laptop, MoreVertical, Tag, Trash2, Download
+  Smartphone, Tablet, Laptop, MoreVertical, Tag, Trash2, Download, RotateCw
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -77,6 +77,24 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
       }
     } else {
       setShowInstallTips(true);
+    }
+  };
+
+  const handleForceRefresh = async () => {
+    try {
+      if (typeof window !== "undefined") {
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((k) => caches.delete(k)));
+        }
+        if ("serviceWorker" in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map((r) => r.unregister()));
+        }
+        window.location.reload();
+      }
+    } catch (e) {
+      window.location.reload();
     }
   };
 
@@ -285,6 +303,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
                 </button>
               </div>
             </div>
+
+            {/* Bouton Forcer Actualisation de la Version */}
+            <button
+              onClick={handleForceRefresh}
+              className="w-full py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-900 text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
+              title="Actualiser et synchroniser la dernière version"
+            >
+              <RotateCw className="w-3.5 h-3.5 text-amber-500" />
+              <span>Actualiser l&apos;application</span>
+            </button>
           </div>
         </aside>
 
