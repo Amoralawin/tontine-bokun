@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import {
   LayoutDashboard, Users, ShieldAlert, Sparkles, Building2,
   Menu, X, Sun, Moon, ShieldCheck, ChevronRight, UserPlus,
-  Smartphone, Tablet, Laptop, MoreVertical, Tag, Trash2, Download, RotateCw, Plus
+  Smartphone, Tablet, Laptop, MoreVertical, Tag, Trash2, Download, RotateCw, Plus, Crown
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -108,6 +108,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
   const navItems = [
     { id: "dashboard", label: t("dashboard"), icon: LayoutDashboard },
+    { id: "owner", label: t("ownerTab"), icon: Crown },
     { id: "groups", label: t("groupsTab"), icon: Building2 },
     ...(canSeeReputation ? [{ id: "reputation", label: t("reputationTab"), icon: ShieldAlert }] : []),
     ...(canSeeMembers ? [{ id: "account", label: t("accountTab"), icon: Users }] : []),

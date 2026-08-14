@@ -59,6 +59,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     testimonialTitle: "Ce que disent nos responsables de tontines",
 
     // Navbar & Roles
+    ownerTab: "👑 Espace Propriétaire",
     reputationTab: "Réputation",
     accountTab: "Membres",
     groupsTab: "Groupes & Adhésion",
@@ -240,6 +241,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     testimonialTitle: "What our tontine leaders say",
 
     // Navbar & Roles
+    ownerTab: "👑 Owner & Revenue",
     reputationTab: "Reputation",
     accountTab: "Members",
     groupsTab: "Groups & Joining",
@@ -410,6 +412,7 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     statReliability: "Nyan wunlo nin fite nuan",
     testimonialTitle: "Awiɛ mun bɔ be su nian tontine su dewa",
 
+    ownerTab: "👑 Espace Propriétaire",
     reputationTab: "Krapu nian",
     accountTab: "Awiɛ mun",
     groupsTab: "Akpasua & Wue nun",
@@ -573,8 +576,9 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     statReliability: "Mɛɖésí ganjí kpó fífá kpó",
     testimonialTitle: "Nǔ e gán tontine tɔn lɛ ɖɔ é",
 
-    reputationTab: "Mɛɖésí kpɔn",
-    accountTab: "Gbɛ́tán mɛ",
+    ownerTab: "👑 Espace Propriétaire",
+    reputationTab: "Kplé ɖagbe tɔn",
+    accountTab: "Gbɛ́tán mɛ lɛ",
     groupsTab: "Gbɛ́tán & Byɔ mɛ",
     viewAs: "Kpɔn nɔnɔmɛ",
     roleOwner: "👑 Akwɛ gán",
@@ -736,7 +740,8 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     statReliability: "Amanɛn ganji",
     testimonialTitle: "Nuhe tovi lɛ dɔ",
 
-    reputationTab: "Mɛɖésí pɔ́n",
+    ownerTab: "👑 Espace Propriétaire",
+    reputationTab: "Kplé xomɛsi tɔn",
     accountTab: "Gbɛ́tɔ́n mɛlẹ",
     groupsTab: "Gbɛ́tɔ́n & Biɔ mɛ",
     viewAs: "Pɔ́n kpo",
@@ -899,9 +904,10 @@ export const TRANSLATIONS: Record<LanguageCode, Record<string, string>> = {
     statReliability: "Nyɔna ganjí",
     testimonialTitle: "Enu ci agbetan lɛ ɖɔ",
 
-    reputationTab: "Agbetan nɔnɔmɛ",
+    ownerTab: "👑 Espace Propriétaire",
+    reputationTab: "Nɔnɔmɛ kpa",
     accountTab: "Agbetan lɛ",
-    groupsTab: "Gbɛ́ & Biɔ mɛ",
+    groupsTab: "Gbɛ́ & Wlu nun",
     viewAs: "Kpɔn sɔgbɛ",
     roleOwner: "👑 Ho gán",
     roleAdmin: "🛡️ Admin",

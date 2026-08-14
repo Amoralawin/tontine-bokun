@@ -11,6 +11,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 import { Sparkles, ArrowRight, Calendar, ShieldCheck, CheckCircle2, HeartHandshake, CreditCard, Users, HelpCircle } from "lucide-react";
 import { GroupExploreView } from "@/components/GroupExploreView";
 import { PaymentCheckoutModal } from "@/components/PaymentCheckoutModal";
+import { OwnerDashboardView } from "@/components/OwnerDashboardView";
 
 // Dictionnaire local pour la traduction de la section des tarifs
 const PRICING_TRANSLATIONS: Record<string, Record<string, string>> = {
@@ -209,6 +210,9 @@ export default function Home() {
 
         {/* DASHBOARD TAB DIRECT VIEW (BENTO BOX GRID) */}
         {activeTab === "dashboard" && <DashboardView />}
+
+        {/* OWNER & REVENUE TAB */}
+        {activeTab === "owner" && <OwnerDashboardView />}
 
         {/* REPUTATION TAB */}
         {activeTab === "reputation" && <ReputationDashboard />}
