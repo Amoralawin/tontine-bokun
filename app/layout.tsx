@@ -51,6 +51,20 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
+        <meta property="og:title" content="Tontine bɔkun — Tontine 2.0 Africa" />
+        <meta property="og:description" content="Digitalisez et sécurisez vos tontines en toute confiance. Calcul automatique des cagnottes, rappels WhatsApp et transparence totale." />
+        <meta property="og:image" content="https://tontine-bokun-universal.vercel.app/og-image.jpg" />
+        <meta property="og:image:secure_url" content="https://tontine-bokun-universal.vercel.app/og-image.jpg" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://tontine-bokun-universal.vercel.app" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://tontine-bokun-universal.vercel.app/og-image.jpg" />
+        <meta name="twitter:title" content="Tontine bɔkun — Tontine 2.0 Africa" />
+        <meta name="twitter:description" content="Digitalisez et sécurisez vos tontines en toute confiance." />
+        <link rel="image_src" href="https://tontine-bokun-universal.vercel.app/og-image.jpg" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
