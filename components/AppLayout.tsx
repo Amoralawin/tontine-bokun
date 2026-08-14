@@ -525,35 +525,30 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
               </p>
             </div>
 
-            <div className="space-y-3">
-              {/* Option 1: Direct PWA Install */}
+            <div className="space-y-4">
               <button
                 onClick={async () => {
                   if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === "accepted") {
-                      setDeferredPrompt(null);
+                    try {
+                      deferredPrompt.prompt();
+                      const { outcome } = await deferredPrompt.userChoice;
+                      if (outcome === "accepted") {
+                        setDeferredPrompt(null);
+                        setShowInstallTips(false);
+                        toast.success("Application ajoutée à votre écran d'accueil !");
+                      }
+                    } catch (e) {
                       setShowInstallTips(false);
-                      toast.success("Application installée avec succès !");
                     }
                   } else {
-                    handleDownloadAppFile();
+                    toast.success("Veuillez utiliser l'option 'Installer' de votre navigateur pour ajouter l'icône à l'écran d'accueil.");
+                    setShowInstallTips(false);
                   }
                 }}
                 className="w-full py-4 px-4 rounded-2xl btn-mango-gold text-slate-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02]"
               >
                 <Smartphone className="w-5 h-5" />
-                <span>📲 Installer sur cet appareil (1 Clic)</span>
-              </button>
-
-              {/* Option 2: Direct File Download */}
-              <button
-                onClick={handleDownloadAppFile}
-                className="w-full py-3 px-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-amber-500/50 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold text-xs flex items-center justify-center gap-2 transition-all"
-              >
-                <Download className="w-4 h-4 text-amber-500" />
-                <span>📥 Télécharger le fichier application (.html)</span>
+                <span>📲 Installer sur mon écran d&apos;accueil</span>
               </button>
             </div>
 
