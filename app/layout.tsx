@@ -28,12 +28,21 @@ export default function RootLayout({
                 e.preventDefault();
                 window.deferredPrompt = e;
               });
-              if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function(regs) {
-                  for (let r of regs) {
-                    r.update();
-                  }
-                });
+              if (typeof window !== 'undefined') {
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.getRegistrations().then(function(regs) {
+                    for (let r of regs) {
+                      r.unregister();
+                    }
+                  });
+                }
+                if ('caches' in window) {
+                  caches.keys().then(function(keys) {
+                    for (let k of keys) {
+                      caches.delete(k);
+                    }
+                  });
+                }
               }
             `,
           }}
