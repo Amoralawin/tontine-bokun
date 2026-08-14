@@ -20,6 +20,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                window.deferredPrompt = e;
+              });
+            `,
+          }}
+        />
+      </head>
       <body suppressHydrationWarning className="antialiased min-h-screen" style={{ backgroundColor: 'var(--page-bg)', color: 'var(--foreground)' }}>
         <Providers>
           <OfflineStatusBanner />

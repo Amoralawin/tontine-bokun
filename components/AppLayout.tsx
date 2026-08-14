@@ -43,7 +43,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
   const { groups, activeGroupId, setActiveGroupId, activeGroup, deleteGroup } = useGroups();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
-  const [deviceMode, setDeviceMode] = useState<"auto" | "mobile" | "tablet">("auto");
   const [mounted, setMounted] = React.useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallTips, setShowInstallTips] = useState(false);
@@ -51,9 +50,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
   React.useEffect(() => {
     setMounted(true);
 
+    // Retrieve early captured deferredPrompt if available
+    if (typeof window !== "undefined" && (window as any).deferredPrompt) {
+      setDeferredPrompt((window as any).deferredPrompt);
+    }
+
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      (window as any).deferredPrompt = e;
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -89,52 +94,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
     { id: "pricing", label: t("pricing"), icon: Tag },
   ];
 
-  const mainContainerClass = {
-    auto: "w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6",
-    tablet: "w-full max-w-[768px] mx-auto px-4 py-6 pb-24 border-x border-slate-200 dark:border-slate-800 shadow-2xl bg-white/95 dark:bg-slate-950/95 my-4 rounded-2xl",
-    mobile: "w-full max-w-[390px] mx-auto px-2 py-4 pb-24 border-x border-slate-200 dark:border-slate-800 shadow-2xl bg-white/95 dark:bg-slate-950/95 my-4 rounded-3xl",
-  }[deviceMode];
+  const mainContainerClass = "w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-6";
 
   return (
     <div className="page-wrapper min-h-screen flex flex-col text-slate-900 dark:text-slate-100 relative">
 
-      {/* Tester Bar (Aperçu Écran Switcher) */}
-      <div className="bg-slate-900 text-white px-4 py-2 text-xs font-bold flex items-center justify-between border-b border-slate-800 sticky top-0 z-50">
-        <div className="flex items-center gap-2">
-          <span className="text-amber-400 font-extrabold">📱 TEST APERÇU ÉCRAN :</span>
-        </div>
-        <div className="flex items-center gap-1 bg-slate-800 p-1 rounded-xl">
-          <button
-            onClick={() => setDeviceMode("auto")}
-            className={`px-3 py-1 rounded-lg text-xs flex items-center gap-1 font-bold transition-all ${
-              deviceMode === "auto" ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <Laptop className="w-3.5 h-3.5" /> Auto (Fluid)
-          </button>
-          <button
-            onClick={() => setDeviceMode("tablet")}
-            className={`px-3 py-1 rounded-lg text-xs flex items-center gap-1 font-bold transition-all ${
-              deviceMode === "tablet" ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <Tablet className="w-3.5 h-3.5" /> Tablette (768px)
-          </button>
-          <button
-            onClick={() => setDeviceMode("mobile")}
-            className={`px-3 py-1 rounded-lg text-xs flex items-center gap-1 font-bold transition-all ${
-              deviceMode === "mobile" ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <Smartphone className="w-3.5 h-3.5" /> Mobile (390px)
-          </button>
-        </div>
-      </div>
-
       {/* Top Header Mobile / Tablette (avec Bouton 3 petits points & Menu) */}
-      <div className={`flex items-center justify-between px-4 py-3 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 sticky top-10 z-40 ${
-        deviceMode === "auto" ? "lg:hidden" : ""
-      }`}>
+      <div className="flex items-center justify-between px-4 py-3 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 lg:hidden">
         <div className="flex items-center gap-2">
           <LogoIcon size={32} />
           <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
@@ -189,9 +155,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
       <div className="flex-1 flex">
         {/* Left Sidebar / Drawer Menu (Ouvre proprement au clic sur les 3 petits points) */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between transition-transform duration-300 shadow-2xl ${
-            deviceMode === "auto" ? "lg:static lg:translate-x-0" : ""
-          } ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+          className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between transition-transform duration-300 shadow-2xl lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
         >
           <div className="space-y-6">
 
@@ -343,9 +307,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
       </div>
 
       {/* MOBILE / TABLETTE BOTTOM FIXED NAVIGATION BAR */}
-      <div className={`fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-950/95 border-t border-slate-200 dark:border-slate-800 py-2.5 px-3 z-40 flex items-center justify-around shadow-2xl backdrop-blur-lg ${
-        deviceMode === "mobile" ? "flex" : (deviceMode === "auto" ? "flex sm:hidden" : "hidden")
-      }`}>
+      <div className="fixed bottom-0 inset-x-0 bg-white/95 dark:bg-slate-950/95 border-t border-slate-200 dark:border-slate-800 py-2.5 px-3 z-40 flex items-center justify-around shadow-2xl backdrop-blur-lg sm:hidden">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
