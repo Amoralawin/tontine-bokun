@@ -12,7 +12,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")
-        .then((reg) => console.log("PWA Service Worker enregistré !", reg.scope))
+        .then((reg) => {
+          reg.update();
+          reg.addEventListener("updatefound", () => {
+            const newWorker = reg.installing;
+            if (newWorker) {
+              newWorker.addEventListener("statechange", () => {
+                if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                  // Nouveau code PWA disponible, rafraîchissement automatique
+                  window.location.reload();
+                }
+              });
+            }
+          });
+        })
         .catch((err) => console.warn("Erreur PWA Service Worker :", err));
     }
   }, []);
