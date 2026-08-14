@@ -240,6 +240,18 @@ export const OwnerDashboardView: React.FC = () => {
               >
                 🔒 Verrouiller
               </button>
+              <button
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    localStorage.removeItem("tontine_is_owner_device");
+                    window.location.href = "/";
+                  }
+                }}
+                className="px-2.5 py-1 rounded-full bg-black/40 hover:bg-black/60 text-slate-200 text-[10px] font-bold transition-colors flex items-center gap-1 border border-white/20"
+                title="Masquer complètement l'onglet de cet appareil"
+              >
+                👁️ Masquer de cet appareil
+              </button>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
               Tableau de Bord & Encaissements Plateforme

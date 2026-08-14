@@ -14,6 +14,7 @@ import { LogoIcon } from "./LogoIcon";
 import { LanguageSelector } from "./LanguageSelector";
 import { JoinGroupModal } from "./JoinGroupModal";
 import { CreateGroupModal } from "./CreateGroupModal";
+import { toast } from "sonner";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -48,9 +49,26 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
   const [mounted, setMounted] = React.useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallTips, setShowInstallTips] = useState(false);
+  const [isOwnerDevice, setIsOwnerDevice] = useState<boolean>(false);
+  const [showSecretPinModal, setShowSecretPinModal] = useState(false);
+  const [secretPinInput, setSecretPinInput] = useState("");
+  const [logoClickCount, setLogoClickCount] = useState(0);
 
   React.useEffect(() => {
     setMounted(true);
+
+    // Vérifier si l'appareil a le droit d'afficher l'espace propriétaire
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("owner") === "1604" || params.get("admin") === "1604") {
+        localStorage.setItem("tontine_is_owner_device", "true");
+        setIsOwnerDevice(true);
+        setActiveTab("owner");
+      } else {
+        const isOwner = localStorage.getItem("tontine_is_owner_device") === "true";
+        setIsOwnerDevice(isOwner);
+      }
+    }
 
     // Retrieve early captured deferredPrompt if available
     if (typeof window !== "undefined" && (window as any).deferredPrompt) {
@@ -106,9 +124,37 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
     member: t("roleMember"),
   };
 
+  const handleLogoSecretClick = () => {
+    setLogoClickCount((prev) => {
+      const next = prev + 1;
+      if (next >= 3) {
+        setShowSecretPinModal(true);
+        return 0;
+      }
+      return next;
+    });
+  };
+
+  const handleUnlockOwnerDevice = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (secretPinInput === "1604") {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("tontine_is_owner_device", "true");
+      }
+      setIsOwnerDevice(true);
+      setShowSecretPinModal(false);
+      setSecretPinInput("");
+      setActiveTab("owner");
+      toast.success("👑 Espace Propriétaire activé sur cet appareil !");
+    } else {
+      toast.error("Code PIN incorrect.");
+      setSecretPinInput("");
+    }
+  };
+
   const navItems = [
     { id: "dashboard", label: t("dashboard"), icon: LayoutDashboard },
-    { id: "owner", label: t("ownerTab") || "👑 Espace Propriétaire", icon: Crown },
+    ...(isOwnerDevice ? [{ id: "owner", label: "👑 Espace Propriétaire", icon: Crown }] : []),
     { id: "groups", label: t("groupsTab"), icon: Building2 },
     ...(canSeeReputation ? [{ id: "reputation", label: t("reputationTab"), icon: ShieldAlert }] : []),
     ...(canSeeMembers ? [{ id: "account", label: t("accountTab"), icon: Users }] : []),
@@ -122,7 +168,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
       {/* Top Header Mobile / Tablette (avec Bouton 3 petits points & Menu) */}
       <div className="flex items-center justify-between px-4 py-3 bg-white/95 dark:bg-slate-950/95 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 lg:hidden">
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer select-none"
+          onClick={handleLogoSecretClick}
+          title="Tontine bɔkun"
+        >
           <LogoIcon size={32} />
           <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
             Tontine <span className="text-amber-500 font-black">bɔkun</span>
@@ -182,7 +232,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
             {/* Header du Menu Tiroir avec Bouton Fermer */}
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2.5">
+              <div
+                className="flex items-center gap-2.5 cursor-pointer select-none"
+                onClick={handleLogoSecretClick}
+                title="Tontine bɔkun (Triple-clic pour le Propriétaire)"
+              >
                 <LogoIcon size={38} />
                 <div>
                   <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white block">
@@ -362,6 +416,56 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
       {/* Create Group Modal */}
       <CreateGroupModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+
+      {/* Secret Owner Device Unlock PIN Modal */}
+      {showSecretPinModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
+          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl max-w-sm w-full space-y-5 text-center animate-fade-up">
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-3xl mx-auto">
+              👑
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                Activer l&apos;Espace Propriétaire
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Entrez votre code PIN secret pour afficher l&apos;espace propriétaire uniquement sur cet appareil.
+              </p>
+            </div>
+
+            <form onSubmit={handleUnlockOwnerDevice} className="space-y-4">
+              <input
+                type="password"
+                value={secretPinInput}
+                onChange={(e) => setSecretPinInput(e.target.value)}
+                placeholder="Code PIN (1604)"
+                maxLength={6}
+                className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center text-xl font-black tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                autoFocus
+              />
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSecretPinModal(false);
+                    setSecretPinInput("");
+                  }}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl btn-mango-gold text-slate-950 font-black text-xs shadow-md"
+                >
+                  Déverrouiller
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* PWA Install Instructions Modal */}
       {showInstallTips && (
