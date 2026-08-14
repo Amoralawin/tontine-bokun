@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import {
   LayoutDashboard, Users, ShieldAlert, Sparkles, Building2,
   Menu, X, Sun, Moon, ShieldCheck, ChevronRight, UserPlus,
-  Smartphone, Tablet, Laptop, MoreVertical, Tag, Trash2, Download, RotateCw
+  Smartphone, Tablet, Laptop, MoreVertical, Tag, Trash2, Download, RotateCw, Plus
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -13,6 +13,7 @@ import { useGroups } from "@/lib/GroupContext";
 import { LogoIcon } from "./LogoIcon";
 import { LanguageSelector } from "./LanguageSelector";
 import { JoinGroupModal } from "./JoinGroupModal";
+import { CreateGroupModal } from "./CreateGroupModal";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -43,6 +44,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
   const { groups, activeGroupId, setActiveGroupId, activeGroup, deleteGroup } = useGroups();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [mounted, setMounted] = React.useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallTips, setShowInstallTips] = useState(false);
@@ -216,6 +218,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
                 ))}
               </select>
 
+              {/* Create New Group Button */}
+              <button
+                onClick={() => {
+                  setIsCreateModalOpen(true);
+                  setSidebarOpen(false);
+                }}
+                className="w-full mt-2 py-2 px-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5 text-amber-500" />
+                <span>+ Nouveau Groupe</span>
+              </button>
+
               {/* Member Self-Registration Button */}
               {activeGroup && (
                 <button
@@ -344,6 +358,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
       {/* Member Self-Registration Modal */}
       <JoinGroupModal group={activeGroup} isOpen={isJoinModalOpen} onClose={() => setIsJoinModalOpen(false)} />
+
+      {/* Create Group Modal */}
+      <CreateGroupModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
 
       {/* PWA Install Instructions Modal */}
       {showInstallTips && (

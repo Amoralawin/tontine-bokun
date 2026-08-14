@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { AlertCircle, CheckCircle2, ShieldAlert, Sparkles, Bell, Trophy, Users, TrendingUp, Camera, Image as ImageIcon, X, Calendar } from "lucide-react";
+import { AlertCircle, CheckCircle2, ShieldAlert, Sparkles, Bell, Trophy, Users, TrendingUp, Camera, Image as ImageIcon, X, Calendar, Plus } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { INITIAL_GROUPS, TontineGroup } from "@/lib/mockData";
 import { formatCurrency } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { useGroups } from "@/lib/GroupContext";
 import { toast } from "sonner";
 
 import { ScheduleMeetingModal } from "./ScheduleMeetingModal";
+import { CreateGroupModal } from "./CreateGroupModal";
 import { MobileDashboardView } from "./MobileDashboardView";
 import { TabletDashboardView } from "./TabletDashboardView";
 
@@ -55,6 +56,7 @@ export const DashboardView: React.FC = () => {
   const { activeGroup: group, updateContributionStatus, updateMeetingPotProof } = useGroups();
   const [activeTab, setActiveTab] = useState<"overview" | "meeting" | "dues">("overview");
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [previewProofModal, setPreviewProofModal] = useState<{ isOpen: boolean; imageUrl: string; title: string } | null>(null);
 
   const wt = (key: string) => {
@@ -70,9 +72,22 @@ export const DashboardView: React.FC = () => {
         <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
           {wt("desc")}
         </p>
+
+        <div className="pt-2">
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="w-full py-3.5 px-4 rounded-2xl btn-mango-gold text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-all"
+          >
+            <Plus className="w-5 h-5 text-slate-950" />
+            <span>Créer mon premier groupe de tontine</span>
+          </button>
+        </div>
+
         <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">
           {wt("notice")}
         </div>
+
+        <CreateGroupModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
       </div>
     );
   }
