@@ -99,6 +99,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
   const handleForceRefresh = async () => {
     try {
       if (typeof window !== "undefined") {
+        localStorage.removeItem("tontine_is_owner_device");
+        sessionStorage.clear();
         if ("caches" in window) {
           const keys = await caches.keys();
           await Promise.all(keys.map((k) => caches.delete(k)));
@@ -107,7 +109,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
           const registrations = await navigator.serviceWorker.getRegistrations();
           await Promise.all(registrations.map((r) => r.unregister()));
         }
-        window.location.reload();
+        window.location.href = window.location.origin + "?refresh=" + Date.now();
       }
     } catch (e) {
       window.location.reload();
