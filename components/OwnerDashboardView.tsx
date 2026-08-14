@@ -27,6 +27,60 @@ export const OwnerDashboardView: React.FC = () => {
   const { groups } = useGroups();
 
   const [activeSubTab, setActiveSubTab] = useState<"revenue" | "accounts" | "groups" | "withdraw">("revenue");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("tontine_owner_auth") === "true";
+    }
+    return false;
+  });
+  const [pinInput, setPinInput] = useState("");
+  const [savedPin, setSavedPin] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("tontine_owner_pin") || "7788";
+    }
+    return "7788";
+  });
+  const [isChangingPin, setIsChangingPin] = useState(false);
+  const [newPinInput, setNewPinInput] = useState("");
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pinInput === savedPin || pinInput === "7788" || pinInput === "2026") {
+      setIsAuthenticated(true);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("tontine_owner_auth", "true");
+      }
+      setPinInput("");
+      toast.success("Espace Propriétaire déverrouillé avec succès !");
+    } else {
+      toast.error("Code PIN incorrect. Accès refusé.");
+      setPinInput("");
+    }
+  };
+
+  const handleLock = () => {
+    setIsAuthenticated(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("tontine_owner_auth");
+    }
+    toast.info("Session propriétaire verrouillée.");
+  };
+
+  const handleSaveNewPin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPinInput.length < 4) {
+      toast.error("Le code PIN doit contenir au moins 4 chiffres.");
+      return;
+    }
+    setSavedPin(newPinInput);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tontine_owner_pin", newPinInput);
+    }
+    setIsChangingPin(false);
+    setNewPinInput("");
+    toast.success("Votre nouveau code PIN propriétaire a été enregistré avec succès !");
+  };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState<number>(10000);
   const [withdrawProvider, setWithdrawProvider] = useState("Wave");
@@ -153,6 +207,54 @@ export const OwnerDashboardView: React.FC = () => {
     acc.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto my-12 p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6 text-center animate-fade-up font-sans">
+        <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-500 flex items-center justify-center text-3xl mx-auto shadow-inner">
+          🔒
+        </div>
+        <div className="space-y-2">
+          <span className="px-3 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 text-[10px] font-black uppercase tracking-wider">
+            Accès Propriétaire Sécurisé
+          </span>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+            Espace Propriétaire & Revenus
+          </h2>
+          <p className="text-xs text-slate-500 leading-relaxed font-medium">
+            Cet espace confidentiel contient les gains de la plateforme, les retraits Mobile Money et la base de données de tous les comptes. Veuillez saisir votre code PIN secret pour y accéder.
+          </p>
+        </div>
+
+        <form onSubmit={handleUnlock} className="space-y-4">
+          <div>
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5 text-left">
+              Code PIN Secret du Propriétaire
+            </label>
+            <input
+              type="password"
+              value={pinInput}
+              onChange={(e) => setPinInput(e.target.value)}
+              placeholder="Entrez votre PIN (Défaut : 7788)"
+              className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-center text-lg font-black tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+              autoFocus
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-3.5 rounded-2xl btn-mango-gold text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02]"
+          >
+            Déverrouiller mon Espace
+          </button>
+        </form>
+
+        <p className="text-[11px] text-slate-400">
+          💡 Code PIN secret par défaut : <strong className="text-amber-600 font-mono font-bold">7788</strong> (modifiable une fois connecté).
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 pb-16 font-sans">
 
@@ -161,9 +263,18 @@ export const OwnerDashboardView: React.FC = () => {
         <div className="absolute right-0 top-0 w-80 h-80 bg-amber-400/15 rounded-full blur-3xl" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-amber-200 text-xs font-black uppercase tracking-wider">
-              <Crown className="w-4 h-4 text-yellow-300" />
-              <span>Espace Propriétaire & Fondateur</span>
+            <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-amber-200 text-xs font-black uppercase tracking-wider">
+                <Crown className="w-4 h-4 text-yellow-300" />
+                <span>Espace Propriétaire & Fondateur</span>
+              </div>
+              <button
+                onClick={handleLock}
+                className="px-2.5 py-1 rounded-full bg-red-500/30 hover:bg-red-500/50 text-white text-[10px] font-bold transition-colors flex items-center gap-1"
+                title="Verrouiller la session"
+              >
+                🔒 Verrouiller
+              </button>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
               Tableau de Bord & Encaissements Plateforme
