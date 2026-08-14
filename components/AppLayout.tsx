@@ -226,7 +226,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
               <div
                 className="flex items-center gap-2.5 cursor-pointer select-none"
                 onClick={handleLogoSecretClick}
-                title="Tontine bɔkun (Triple-clic pour le Propriétaire)"
+                title="Tontine bɔkun"
               >
                 <LogoIcon size={38} />
                 <div>
