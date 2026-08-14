@@ -42,7 +42,8 @@ interface GroupContextType {
   approveJoinRequest: (requestId: string) => void;
   rejectJoinRequest: (requestId: string) => void;
   scheduleMeeting: (groupId: string, date: string, location: string, beneficiaryId: string, beneficiaryName: string, notes?: string) => void;
-  updateContributionStatus: (groupId: string, meetingId: string, memberId: string, status: "paid" | "pending" | "late") => void;
+  updateContributionStatus: (groupId: string, meetingId: string, memberId: string, status: "paid" | "pending" | "late", proofUrl?: string) => Promise<void>;
+  updateMeetingPotProof: (groupId: string, meetingId: string, potProofUrl: string) => Promise<void>;
   syncFromSupabase: () => Promise<void>;
 }
 
@@ -58,7 +59,8 @@ const LanguageContextDefault: GroupContextType = {
   approveJoinRequest: () => {},
   rejectJoinRequest: () => {},
   scheduleMeeting: () => {},
-  updateContributionStatus: () => {},
+  updateContributionStatus: async () => {},
+  updateMeetingPotProof: async () => {},
   syncFromSupabase: async () => {},
 };
 
@@ -576,12 +578,13 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Mise à jour du statut d'une cotisation
+  // Mise à jour du statut d'une cotisation (avec preuve de capture d'écran optionnelle)
   const updateContributionStatus = async (
     groupId: string,
     meetingId: string,
     memberId: string,
-    status: "paid" | "pending" | "late"
+    status: "paid" | "pending" | "late",
+    proofUrl?: string
   ) => {
     setGroups((prevGroups) =>
       prevGroups.map((g) => {
@@ -598,6 +601,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         ...c,
                         status,
                         paidAt: status === "paid" ? new Date().toLocaleDateString("fr-FR") : undefined,
+                        proofUrl: proofUrl || c.proofUrl,
                       };
                     }
                     return c;
@@ -611,7 +615,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return g;
       })
     );
-    toast.success("Statut mis à jour localement !");
+    toast.success("Statut mis à jour !");
 
     // Synchro Supabase
     try {
@@ -620,10 +624,37 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .update({ status, paid_at: paidAtStr })
         .eq("meeting_id", meetingId)
         .eq("member_id", memberId);
-      toast.success("Cotisation mise à jour sur Supabase !");
     } catch (e) {
       console.warn(e);
     }
+  };
+
+  // Preuve de versement/réception du pot
+  const updateMeetingPotProof = async (
+    groupId: string,
+    meetingId: string,
+    potProofUrl: string
+  ) => {
+    setGroups((prevGroups) =>
+      prevGroups.map((g) => {
+        if (g.id === groupId) {
+          return {
+            ...g,
+            meetings: g.meetings.map((m) => {
+              if (m.id === meetingId) {
+                return {
+                  ...m,
+                  potProofUrl,
+                };
+              }
+              return m;
+            }),
+          };
+        }
+        return g;
+      })
+    );
+    toast.success("Preuve de virement du pot enregistrée !");
   };
 
   return (
@@ -641,6 +672,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         rejectJoinRequest,
         scheduleMeeting,
         updateContributionStatus,
+        updateMeetingPotProof,
         syncFromSupabase,
       }}
     >

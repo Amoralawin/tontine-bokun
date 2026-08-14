@@ -15,6 +15,7 @@ export interface Contribution {
   amount: number;
   status: "paid" | "pending" | "late";
   paidAt?: string;
+  proofUrl?: string;
 }
 
 export interface Meeting {
@@ -27,6 +28,7 @@ export interface Meeting {
   potAmount: number;
   status: "upcoming" | "in_progress" | "completed";
   contributions: Contribution[];
+  potProofUrl?: string;
 }
 
 export interface TontineGroup {

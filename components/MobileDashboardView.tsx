@@ -11,16 +11,18 @@ import { ScheduleMeetingModal } from "./ScheduleMeetingModal";
 import { PaymentCheckoutModal } from "./PaymentCheckoutModal";
 import {
   Trophy, Calendar, Users, Sparkles, CheckCircle2, Clock,
-  AlertTriangle, DollarSign, ChevronRight, Volume2, Shield, CreditCard
+  AlertTriangle, DollarSign, ChevronRight, Volume2, Shield, CreditCard,
+  Camera, Image as ImageIcon, X
 } from "lucide-react";
 
 export const MobileDashboardView: React.FC = () => {
-  const { activeGroup: group, updateContributionStatus } = useGroups();
+  const { activeGroup: group, updateContributionStatus, updateMeetingPotProof } = useGroups();
   const { canSeePenalties, isAdmin, role } = useUserRole();
   const { t } = useLanguage();
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [selectedMemberForPay, setSelectedMemberForPay] = useState<string | null>(null);
+  const [previewProofModal, setPreviewProofModal] = useState<{ isOpen: boolean; imageUrl: string; title: string } | null>(null);
 
   if (!group) return null;
 
@@ -44,9 +46,9 @@ export const MobileDashboardView: React.FC = () => {
     }
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = (proofUrl?: string) => {
     if (selectedMemberForPay && meeting) {
-      updateContributionStatus(group.id, meeting.id, selectedMemberForPay, "paid");
+      updateContributionStatus(group.id, meeting.id, selectedMemberForPay, "paid", proofUrl);
       setSelectedMemberForPay(null);
     }
   };
@@ -119,6 +121,39 @@ export const MobileDashboardView: React.FC = () => {
           <div className="w-14 h-14 rounded-2xl bg-amber-500 overflow-hidden shadow-lg shrink-0 border border-amber-400">
             <img src="/pot_winner.jpg" alt="Cagnotte Gagnée" className="w-full h-full object-cover" />
           </div>
+        </div>
+
+        {/* Preuve de versement du pot Mobile */}
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
+          {meeting?.potProofUrl ? (
+            <button
+              onClick={() => setPreviewProofModal({ isOpen: true, imageUrl: meeting.potProofUrl!, title: `Preuve de versement du pot à ${meeting.beneficiaryName}` })}
+              className="w-full py-2 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5"
+            >
+              <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Voir la preuve de virement du pot</span>
+            </button>
+          ) : (
+            <label className="cursor-pointer w-full py-2 px-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 font-bold text-xs flex items-center justify-center gap-1.5">
+              <Camera className="w-3.5 h-3.5 text-amber-500" />
+              <span>Joindre la capture du virement du pot</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file && meeting) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      updateMeetingPotProof(group.id, meeting.id, reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </label>
+          )}
         </div>
       </div>
 
@@ -205,7 +240,35 @@ export const MobileDashboardView: React.FC = () => {
 
                 {/* Status Selector Buttons */}
                 <div className="flex items-center justify-between gap-1 pt-2 border-t border-slate-200/70 dark:border-slate-800/70">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Statut :</span>
+                  <div className="flex items-center gap-1">
+                    {c.proofUrl && (
+                      <button
+                        onClick={() => setPreviewProofModal({ isOpen: true, imageUrl: c.proofUrl!, title: `Reçu de versement — ${c.memberName}` })}
+                        className="px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 font-bold text-[10px] flex items-center gap-1"
+                      >
+                        <ImageIcon className="w-3 h-3" />
+                        <span>Preuve</span>
+                      </button>
+                    )}
+                    <label className="cursor-pointer p-1.5 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-500 hover:text-amber-500" title="Joindre reçu">
+                      <Camera className="w-3 h-3" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file && meeting) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              updateContributionStatus(group.id, meeting.id, c.memberId, "paid", reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                   <div className="flex items-center gap-1 bg-white dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
                     <button
                       onClick={() => handleStatusChange(c.memberId, "paid")}
@@ -295,6 +358,39 @@ export const MobileDashboardView: React.FC = () => {
 
       {/* Schedule Meeting Modal */}
       <ScheduleMeetingModal isOpen={isScheduleOpen} onClose={() => setIsScheduleOpen(false)} />
+
+      {/* Proof Lightbox Modal */}
+      {previewProofModal && previewProofModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-up">
+          <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl max-w-sm w-full space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
+                <ImageIcon className="w-4 h-4 text-amber-500 shrink-0" />
+                <span className="truncate">{previewProofModal.title}</span>
+              </h3>
+              <button
+                onClick={() => setPreviewProofModal(null)}
+                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 max-h-[300px] flex items-center justify-center bg-slate-950">
+              <img
+                src={previewProofModal.imageUrl}
+                alt="Capture d'écran du reçu"
+                className="w-full h-auto max-h-[280px] object-contain"
+              />
+            </div>
+            <button
+              onClick={() => setPreviewProofModal(null)}
+              className="w-full py-2 rounded-xl bg-amber-500 text-slate-950 font-black text-xs"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

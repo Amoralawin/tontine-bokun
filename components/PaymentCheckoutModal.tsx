@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, CheckCircle2, ShieldCheck, CreditCard, Smartphone, ArrowRight, Lock, Sparkles } from "lucide-react";
+import { X, CheckCircle2, ShieldCheck, CreditCard, Smartphone, ArrowRight, Lock, Sparkles, Camera, Image as ImageIcon } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 
 interface PaymentCheckoutModalProps {
@@ -10,7 +10,7 @@ interface PaymentCheckoutModalProps {
   title: string;
   baseAmount: number;
   feeAmount?: number;
-  onSuccess?: () => void;
+  onSuccess?: (proofUrl?: string) => void;
 }
 
 export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({
@@ -27,6 +27,7 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({
   const [cardNumber, setCardNumber] = useState("");
   const [cardExp, setCardExp] = useState("");
   const [cardCvc, setCardCvc] = useState("");
+  const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [receiptRef, setReceiptRef] = useState("");
@@ -46,7 +47,7 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({
       setIsProcessing(false);
       setIsDone(true);
       setReceiptRef(`PAY-${Math.floor(100000 + Math.random() * 900000)}`);
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(proofUrl || undefined);
     }, 1800);
   };
 
@@ -221,6 +222,40 @@ export const PaymentCheckoutModal: React.FC<PaymentCheckoutModalProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Capture d'écran du Reçu de Dépôt / Transfert */}
+            <div className="p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/20 space-y-2">
+              <label className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Camera className="w-4 h-4 text-amber-500" />
+                  Capture d&apos;écran du dépôt / reçu Mobile Money *
+                </span>
+                <span className="text-[10px] text-amber-700 dark:text-amber-400 font-extrabold bg-amber-500/10 px-2 py-0.5 rounded-full">Preuve requise</span>
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setProofUrl(reader.result as string);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-500/10 file:text-amber-700 dark:file:text-amber-400 hover:file:bg-amber-500/20"
+              />
+              {proofUrl && (
+                <div className="p-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-2">
+                  <img src={proofUrl} alt="Reçu joint" className="w-10 h-10 object-cover rounded-lg border border-emerald-500/30" />
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" /> Capture d&apos;écran jointe avec succès
+                  </span>
+                </div>
+              )}
+            </div>
 
             {/* Bouton Payer */}
             <button

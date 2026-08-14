@@ -30,21 +30,26 @@ export const ReputationDashboard: React.FC = () => {
   const [searchResult, setSearchResult] = useState<MemberReputation | null | "not_found">(null);
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null);
 
-  // Combine Mock Reputations and Real calculated member reputations
-  const allReputations = [...MOCK_REPUTATIONS];
+  // Calculate member reputations solely from real groups in context
+  const allReputations: MemberReputation[] = [];
+  let totalCollectedPenalties = 0;
+
   groups.forEach((g) => {
     g.members.forEach((m) => {
-      // Check if already in list to avoid duplicates
-      const exists = allReputations.some((r) => {
-        const cleanPhone = (m.phone || "").replace(/\s+/g, "");
-        const repPhone = (r.identity?.phone || "").replace(/\s+/g, "");
-        const phoneMatch = cleanPhone.length > 5 && repPhone.length > 5 && repPhone.includes(cleanPhone);
-        const nameMatch = m.name.toLowerCase() === r.memberName.toLowerCase();
-        return phoneMatch || nameMatch;
-      });
+      const exists = allReputations.some((r) => r.memberId === m.id);
       if (!exists) {
         allReputations.push(getOrCreateMemberReputation(m, g));
       }
+    });
+
+    g.meetings.forEach((mt) => {
+      mt.contributions.forEach((c) => {
+        if (c.status === "paid") {
+          // Si payé après retard
+        } else if (c.status === "late") {
+          totalCollectedPenalties += Math.round(g.contributionAmount * 0.05);
+        }
+      });
     });
   });
 
@@ -85,7 +90,7 @@ export const ReputationDashboard: React.FC = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/20">
           <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mb-1">💰 Pénalités perçues</div>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{fmt(PLATFORM_REVENUE.totalPenaltiesCollected)}</div>
+          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{fmt(totalCollectedPenalties)}</div>
           <div className="text-[10px] text-slate-400 mt-0.5">Depuis le lancement</div>
         </div>
         <div className="p-5 rounded-xl border border-amber-500/30 bg-amber-500/5 dark:bg-amber-950/20">
@@ -189,88 +194,98 @@ export const ReputationDashboard: React.FC = () => {
         </h3>
         <PenaltyLegend />
 
-        <div className="space-y-3">
-          {allReputations.map((rep) => {
-            const config = getReputationConfig(rep.level);
-            const isExpanded = expandedHistory === rep.memberId;
+        {allReputations.length === 0 ? (
+          <div className="p-8 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2.5">
+            <div className="text-3xl">🛡️</div>
+            <div className="text-sm font-bold text-slate-800 dark:text-white">Aucun membre enregistré pour le moment</div>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Créez votre premier groupe et ajoutez vos membres pour suivre automatiquement leur score de fiabilité et de ponctualité !
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {allReputations.map((rep) => {
+              const config = getReputationConfig(rep.level);
+              const isExpanded = expandedHistory === rep.memberId;
 
-            return (
-              <div key={rep.memberId} className="rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
-                <div
-                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-950/50 transition-colors"
-                  onClick={() => setExpandedHistory(isExpanded ? null : rep.memberId)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 ${config.border} ${config.bg} ${config.color}`}>
-                      {rep.memberName.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 flex-wrap">
-                        <span>{rep.memberName}</span>
-                        <MemberReputationBadge reputation={rep} />
+              return (
+                <div key={rep.memberId} className="rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+                  <div
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-950/50 transition-colors"
+                    onClick={() => setExpandedHistory(isExpanded ? null : rep.memberId)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 ${config.border} ${config.bg} ${config.color}`}>
+                        {rep.memberName.charAt(0)}
                       </div>
-                      <div className="text-xs text-slate-400">{rep.identity.phone} • {rep.identity.email}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-xs shrink-0">
-                    {rep.totalPenaltiesOwed > 0 && (
-                      <span className="text-red-600 font-bold">{fmt(rep.totalPenaltiesOwed)} dû</span>
-                    )}
-                    {rep.totalPenaltiesPaid > 0 && (
-                      <span className="text-emerald-600 font-bold">{fmt(rep.totalPenaltiesPaid)} payé</span>
-                    )}
-                    {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-                  </div>
-                </div>
-
-                {isExpanded && (
-                  <div className="px-4 pb-4 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-3">
-                    {/* History */}
-                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Historique</div>
-                    <div className="space-y-2">
-                      {rep.reputationHistory.map((event) => (
-                        <div key={event.id} className="flex items-center justify-between gap-3 text-xs p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950">
-                          <div>
-                            <span className="mr-1.5">
-                              {event.type === "on_time" ? "✅" :
-                               event.type === "late" ? "⚠️" :
-                               event.type === "unpaid" ? "🔴" :
-                               event.type === "excluded" ? "🚫" : "🔄"}
-                            </span>
-                            <span className="text-slate-700 dark:text-slate-300">{event.description}</span>
-                            <span className="ml-1.5 text-slate-400">— {event.date}</span>
-                          </div>
-                          <span className={`font-bold shrink-0 ${event.scoreChange > 0 ? "text-emerald-600" : "text-red-600"}`}>
-                            {event.scoreChange > 0 ? "+" : ""}{event.scoreChange} pts
-                          </span>
+                      <div>
+                        <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 flex-wrap">
+                          <span>{rep.memberName}</span>
+                          <MemberReputationBadge reputation={rep} />
                         </div>
-                      ))}
+                        <div className="text-xs text-slate-400">{rep.identity.phone} • {rep.identity.email}</div>
+                      </div>
                     </div>
 
-                    {/* Unblock action */}
-                    {rep.level === "blocked" && rep.unblockRequestPending && (
-                      <div className="flex gap-3 pt-1">
-                        <button
-                          onClick={() => toast.success(`${rep.memberName} a été débloqué !`)}
-                          className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
-                        >
-                          ✅ Approuver le déblocage
-                        </button>
-                        <button
-                          onClick={() => toast.error(`Déblocage refusé pour ${rep.memberName}.`)}
-                          className="flex-1 py-2 rounded-lg border border-red-500/30 text-red-600 font-bold text-xs hover:bg-red-500/10"
-                        >
-                          ❌ Refuser
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-4 text-xs shrink-0">
+                      {rep.totalPenaltiesOwed > 0 && (
+                        <span className="text-red-600 font-bold">{fmt(rep.totalPenaltiesOwed)} dû</span>
+                      )}
+                      {rep.totalPenaltiesPaid > 0 && (
+                        <span className="text-emerald-600 font-bold">{fmt(rep.totalPenaltiesPaid)} payé</span>
+                      )}
+                      {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+
+                  {isExpanded && (
+                    <div className="px-4 pb-4 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-3">
+                      {/* History */}
+                      <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">Historique</div>
+                      <div className="space-y-2">
+                        {rep.reputationHistory.map((event) => (
+                          <div key={event.id} className="flex items-center justify-between gap-3 text-xs p-2.5 rounded-lg bg-slate-50 dark:bg-slate-950">
+                            <div>
+                              <span className="mr-1.5">
+                                {event.type === "on_time" ? "✅" :
+                                 event.type === "late" ? "⚠️" :
+                                 event.type === "unpaid" ? "🔴" :
+                                 event.type === "excluded" ? "🚫" : "🔄"}
+                              </span>
+                              <span className="text-slate-700 dark:text-slate-300">{event.description}</span>
+                              <span className="ml-1.5 text-slate-400">— {event.date}</span>
+                            </div>
+                            <span className={`font-bold shrink-0 ${event.scoreChange > 0 ? "text-emerald-600" : "text-red-600"}`}>
+                              {event.scoreChange > 0 ? "+" : ""}{event.scoreChange} pts
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Unblock action */}
+                      {rep.level === "blocked" && rep.unblockRequestPending && (
+                        <div className="flex gap-3 pt-1">
+                          <button
+                            onClick={() => toast.success(`${rep.memberName} a été débloqué !`)}
+                            className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
+                          >
+                            ✅ Approuver le déblocage
+                          </button>
+                          <button
+                            onClick={() => toast.error(`Déblocage refusé pour ${rep.memberName}.`)}
+                            className="flex-1 py-2 rounded-lg border border-red-500/30 text-red-600 font-bold text-xs hover:bg-red-500/10"
+                          >
+                            ❌ Refuser
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
