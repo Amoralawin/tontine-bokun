@@ -8,12 +8,13 @@ import {
 } from "lucide-react";
 import {
   MOCK_REPUTATIONS, PLATFORM_REVENUE, getReputationConfig,
-  MemberReputation, calculatePenalty, getPenaltyRate
+  MemberReputation, calculatePenalty, getPenaltyRate, getOrCreateMemberReputation
 } from "@/lib/reputationSystem";
 import { MemberReputationBadge } from "./MemberReputationBadge";
 import { BlockedMemberAlert } from "./BlockedMemberAlert";
 import { PenaltyLegend } from "./PenaltyLegend";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useGroups } from "@/lib/GroupContext";
 import { toast } from "sonner";
 
 function fmt(n: number) {
@@ -22,23 +23,43 @@ function fmt(n: number) {
 
 export const ReputationDashboard: React.FC = () => {
   const { t } = useLanguage();
+  const { groups } = useGroups();
   const [selectedMember, setSelectedMember] = useState<MemberReputation | null>(null);
   const [showAddMemberDemo, setShowAddMemberDemo] = useState(false);
   const [searchPhone, setSearchPhone] = useState("");
   const [searchResult, setSearchResult] = useState<MemberReputation | null | "not_found">(null);
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null);
 
-  const blockedMembers = MOCK_REPUTATIONS.filter((m) => m.level === "blocked");
-  const restrictedMembers = MOCK_REPUTATIONS.filter((m) => m.level === "restricted");
-  const warningMembers = MOCK_REPUTATIONS.filter((m) => m.level === "warning");
-  const totalPending = MOCK_REPUTATIONS.reduce((sum, m) => sum + m.totalPenaltiesOwed, 0);
+  // Combine Mock Reputations and Real calculated member reputations
+  const allReputations = [...MOCK_REPUTATIONS];
+  groups.forEach((g) => {
+    g.members.forEach((m) => {
+      // Check if already in list to avoid duplicates
+      const exists = allReputations.some((r) => {
+        const cleanPhone = (m.phone || "").replace(/\s+/g, "");
+        const repPhone = (r.identity?.phone || "").replace(/\s+/g, "");
+        const phoneMatch = cleanPhone.length > 5 && repPhone.length > 5 && repPhone.includes(cleanPhone);
+        const nameMatch = m.name.toLowerCase() === r.memberName.toLowerCase();
+        return phoneMatch || nameMatch;
+      });
+      if (!exists) {
+        allReputations.push(getOrCreateMemberReputation(m, g));
+      }
+    });
+  });
+
+  const blockedMembers = allReputations.filter((m) => m.level === "blocked");
+  const restrictedMembers = allReputations.filter((m) => m.level === "restricted");
+  const warningMembers = allReputations.filter((m) => m.level === "warning");
+  const totalPending = allReputations.reduce((sum, m) => sum + m.totalPenaltiesOwed, 0);
 
   const handleSearch = () => {
-    const found = MOCK_REPUTATIONS.find(
+    const found = allReputations.find(
       (m) =>
         m.identity.phone?.includes(searchPhone) ||
         m.identity.email?.toLowerCase().includes(searchPhone.toLowerCase()) ||
-        m.identity.momoNumber?.includes(searchPhone)
+        m.identity.momoNumber?.includes(searchPhone) ||
+        m.memberName.toLowerCase().includes(searchPhone.toLowerCase())
     );
     setSearchResult(found || "not_found");
   };
@@ -169,7 +190,7 @@ export const ReputationDashboard: React.FC = () => {
         <PenaltyLegend />
 
         <div className="space-y-3">
-          {MOCK_REPUTATIONS.map((rep) => {
+          {allReputations.map((rep) => {
             const config = getReputationConfig(rep.level);
             const isExpanded = expandedHistory === rep.memberId;
 

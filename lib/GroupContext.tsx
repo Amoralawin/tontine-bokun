@@ -6,6 +6,16 @@ import { MOCK_REPUTATIONS, isMemberBlockedGlobally } from "./reputationSystem";
 import { toast } from "sonner";
 import { supabase } from "./supabaseClient";
 
+function uuidv4(): string {
+  if (typeof window !== "undefined" && window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 export interface JoinRequest {
   id: string;
   groupId: string;
@@ -26,6 +36,7 @@ interface GroupContextType {
   activeGroup: TontineGroup;
   setActiveGroupId: (id: string) => void;
   createGroup: (name: string, amount: number, frequency: string, creatorName: string, creatorPhone: string) => void;
+  deleteGroup: (groupId: string) => Promise<void>;
   joinRequests: JoinRequest[];
   submitJoinRequest: (groupId: string, memberName: string, phone: string, email: string, momoNumber: string, momoProvider: string, message?: string) => boolean;
   approveJoinRequest: (requestId: string) => void;
@@ -34,6 +45,22 @@ interface GroupContextType {
   updateContributionStatus: (groupId: string, meetingId: string, memberId: string, status: "paid" | "pending" | "late") => void;
   syncFromSupabase: () => Promise<void>;
 }
+
+const LanguageContextDefault: GroupContextType = {
+  groups: [],
+  activeGroupId: "",
+  activeGroup: undefined as any,
+  setActiveGroupId: () => {},
+  createGroup: () => {},
+  deleteGroup: async () => {},
+  joinRequests: [],
+  submitJoinRequest: () => false,
+  approveJoinRequest: () => {},
+  rejectJoinRequest: () => {},
+  scheduleMeeting: () => {},
+  updateContributionStatus: () => {},
+  syncFromSupabase: async () => {},
+};
 
 const INITIAL_REQUESTS: JoinRequest[] = [
   {
@@ -203,7 +230,10 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Création d'un nouveau groupe
   const createGroup = async (name: string, amount: number, frequency: string, creatorName: string, creatorPhone: string) => {
-    const groupId = `group-${Date.now()}`;
+    const groupId = uuidv4();
+    const adminId = uuidv4();
+    const meetingId = uuidv4();
+
     const newGroup: TontineGroup = {
       id: groupId,
       name,
@@ -214,7 +244,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       totalPot: amount * 6,
       members: [
         {
-          id: `m-admin-${Date.now()}`,
+          id: adminId,
           name: creatorName || "Admin Créateur",
           phone: creatorPhone || "+225 07 00 00 00",
           avatar: "👑",
@@ -226,17 +256,17 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ],
       meetings: [
         {
-          id: `mt-${Date.now()}`,
+          id: meetingId,
           meetingNumber: 1,
           date: new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }),
           location: "En ligne / Réunion locale",
-          beneficiaryId: `m-admin-${Date.now()}`,
+          beneficiaryId: adminId,
           beneficiaryName: creatorName || "Admin Créateur",
           potAmount: amount,
           status: "in_progress",
           contributions: [
             {
-              memberId: `m-admin-${Date.now()}`,
+              memberId: adminId,
               memberName: creatorName || "Admin Créateur",
               amount,
               status: "paid",
@@ -302,6 +332,37 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     } catch (e) {
       console.warn("Échec écriture Supabase :", e);
+    }
+  };
+
+  // Supprimer un groupe
+  const deleteGroup = async (groupId: string) => {
+    // 1. Mise à jour de l'état local
+    setGroups((prev) => {
+      const filtered = prev.filter((g) => g.id !== groupId);
+      if (activeGroupId === groupId) {
+        if (filtered.length > 0) {
+          setActiveGroupId(filtered[0].id);
+        } else {
+          setActiveGroupId("");
+        }
+      }
+      return filtered;
+    });
+
+    toast.success("Le groupe a été supprimé !");
+
+    // 2. Synchronisation de la suppression sur Supabase
+    try {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        return;
+      }
+      const { error } = await supabase.from("groups").delete().eq("id", groupId);
+      if (error) {
+        console.warn("Erreur suppression Supabase :", error);
+      }
+    } catch (e) {
+      console.warn("Échec suppression Supabase :", e);
     }
   };
 
@@ -573,6 +634,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         activeGroup,
         setActiveGroupId,
         createGroup,
+        deleteGroup,
         joinRequests,
         submitJoinRequest,
         approveJoinRequest,

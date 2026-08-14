@@ -6,7 +6,7 @@ import { useUserRole } from "@/lib/UserRoleContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import { TTSVoiceReader } from "./TTSVoiceReader";
 import { MemberReputationBadge } from "./MemberReputationBadge";
-import { MOCK_REPUTATIONS } from "@/lib/reputationSystem";
+import { MOCK_REPUTATIONS, getOrCreateMemberReputation } from "@/lib/reputationSystem";
 import { ScheduleMeetingModal } from "./ScheduleMeetingModal";
 import {
   Trophy, Calendar, Users, Sparkles, Clock, CheckCircle2, AlertTriangle, Shield
@@ -107,7 +107,7 @@ export const TabletDashboardView: React.FC = () => {
             <div className="space-y-2.5">
               {meeting?.contributions.map((c) => {
                 const member = group.members.find((m) => m.id === c.memberId);
-                const reputation = MOCK_REPUTATIONS.find((r) => r.memberId === c.memberId);
+                const reputation = member ? getOrCreateMemberReputation(member, group) : undefined;
                 return (
                   <div
                     key={c.memberId}
@@ -194,7 +194,7 @@ export const TabletDashboardView: React.FC = () => {
 
             <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
               {group.members.map((m) => {
-                const rep = MOCK_REPUTATIONS.find((r) => r.memberId === m.id);
+                const rep = getOrCreateMemberReputation(m, group);
                 return (
                   <div
                     key={m.id}

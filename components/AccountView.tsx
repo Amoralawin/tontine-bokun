@@ -6,8 +6,10 @@ import {
   Users, Edit2, Trash2, Shield, ChevronRight, Save, X
 } from "lucide-react";
 import { MemberReputationBadge } from "./MemberReputationBadge";
-import { MOCK_REPUTATIONS } from "@/lib/reputationSystem";
+import { getOrCreateMemberReputation } from "@/lib/reputationSystem";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useGroups } from "@/lib/GroupContext";
+import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 
 interface RegisteredMember {
@@ -22,54 +24,12 @@ interface RegisteredMember {
   avatar: string;
 }
 
-const INITIAL_MEMBERS: RegisteredMember[] = [
-  {
-    id: "m1",
-    name: "Amina Koné",
-    phone: "+225 07 01 02 03",
-    email: "amina.kone@gmail.com",
-    momoNumber: "0701020304",
-    momoProvider: "Orange Money",
-    groups: ["Tontine des Mamans d'Abidjan", "Tontine Femmes Cocody"],
-    joinedAt: "12/01/2026",
-    avatar: "👩🏾",
-  },
-  {
-    id: "m2",
-    name: "Kofi Kouassi",
-    phone: "+225 05 04 05 06",
-    email: "kofi.kouassi@yahoo.fr",
-    momoNumber: "0504050607",
-    momoProvider: "Wave",
-    groups: ["Tontine des Mamans d'Abidjan"],
-    joinedAt: "12/01/2026",
-    avatar: "👨🏾",
-  },
-  {
-    id: "m5",
-    name: "Fatou Bamba",
-    phone: "+225 05 13 14 15",
-    email: "fatou.bamba@gmail.com",
-    momoNumber: "0513141516",
-    momoProvider: "MTN MoMo",
-    groups: ["Tontine des Mamans d'Abidjan", "Tontine Entraide Cocody", "Tontine Femmes du Plateau"],
-    joinedAt: "03/02/2026",
-    avatar: "👩🏿",
-  },
-];
-
 const MOMO_PROVIDERS = ["Orange Money", "Wave", "MTN MoMo", "Moov Money"];
-const GROUPS = [
-  "Tontine des Mamans d'Abidjan",
-  "Tontine Entraide Cocody",
-  "Tontine Femmes du Plateau",
-  "Tontine Cotonou Prospérité",
-  "Tontine Femmes de Porto-Novo",
-];
 
 export const AccountView: React.FC = () => {
   const { t } = useLanguage();
-  const [members, setMembers] = useState<RegisteredMember[]>(INITIAL_MEMBERS);
+  const { activeGroup, groups: allGroups, syncFromSupabase } = useGroups();
+
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<string | null>(null);
@@ -78,6 +38,19 @@ export const AccountView: React.FC = () => {
     momoNumber: "", momoProvider: "Orange Money",
     groups: [] as string[], avatar: "👤",
   });
+
+  // Load real members of the active group
+  const members: RegisteredMember[] = activeGroup ? activeGroup.members.map((m) => ({
+    id: m.id,
+    name: m.name,
+    phone: m.phone,
+    email: (m as any).email || "",
+    momoNumber: (m as any).momoNumber || "",
+    momoProvider: (m as any).momoProvider || "Orange Money",
+    groups: [activeGroup.name],
+    joinedAt: "12/08/2026",
+    avatar: m.avatar,
+  })) : [];
 
   const resetForm = () => {
     setForm({ name: "", phone: "", email: "", momoNumber: "", momoProvider: "Orange Money", groups: [], avatar: "👤" });
@@ -92,10 +65,20 @@ export const AccountView: React.FC = () => {
     setActiveCard(null);
   };
 
-  const handleDelete = (id: string) => {
-    setMembers((prev) => prev.filter((m) => m.id !== id));
-    toast.success("Membre supprimé.");
-    setActiveCard(null);
+  const handleDelete = async (id: string) => {
+    if (!activeGroup) return;
+    try {
+      const { error } = await supabase.from("members").delete().eq("id", id);
+      if (error) {
+        toast.error("Erreur de suppression sur Supabase.");
+        return;
+      }
+      toast.success("Membre supprimé.");
+      setActiveCard(null);
+      syncFromSupabase();
+    } catch (e) {
+      console.warn(e);
+    }
   };
 
   const handleToggleGroup = (g: string) => {
@@ -105,29 +88,61 @@ export const AccountView: React.FC = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name || !form.phone) {
       toast.error("Le nom et le téléphone sont obligatoires.");
       return;
     }
+    if (!activeGroup) {
+      toast.error("Veuillez d'abord sélectionner ou créer un groupe.");
+      return;
+    }
+
     if (editId) {
-      setMembers((prev) =>
-        prev.map((m) => m.id === editId ? { ...m, ...form } : m)
-      );
-      toast.success("Membre mis à jour !");
+      try {
+        const { error } = await supabase.from("members").update({
+          name: form.name,
+          phone: form.phone,
+          avatar: form.avatar,
+        }).eq("id", editId);
+
+        if (error) throw error;
+        toast.success("Membre mis à jour !");
+        syncFromSupabase();
+      } catch (e) {
+        console.warn(e);
+        toast.error("Échec de la mise à jour.");
+      }
     } else {
-      const newMember: RegisteredMember = {
-        id: `m-${Date.now()}`,
-        joinedAt: new Date().toLocaleDateString("fr-FR"),
-        ...form,
-      };
-      setMembers((prev) => [...prev, newMember]);
-      toast.success(`${form.name} enregistré(e) avec succès !`);
+      try {
+        const newMemberId = typeof window !== "undefined" && window.crypto?.randomUUID ? window.crypto.randomUUID() : `m-${Date.now()}`;
+        const newPos = activeGroup.members.length + 1;
+
+        const { error } = await supabase.from("members").insert({
+          id: newMemberId,
+          group_id: activeGroup.id,
+          name: form.name,
+          phone: form.phone,
+          avatar: form.avatar,
+          position: newPos,
+          role: "member",
+          paid_count: 0,
+          total_due: activeGroup.contributionAmount,
+        });
+
+        if (error) throw error;
+        toast.success(`${form.name} enregistré(e) avec succès !`);
+        syncFromSupabase();
+      } catch (e) {
+        console.warn(e);
+        toast.error("Échec de la création du membre.");
+      }
     }
     resetForm();
   };
 
   const AVATARS = ["👤", "👩🏾", "👨🏾", "👩🏿", "👨🏿", "👩🏽", "👨🏽", "🧑🏾", "🧒🏾"];
+
 
   return (
     <div className="space-y-8 pb-12">
@@ -163,7 +178,7 @@ export const AccountView: React.FC = () => {
           <div className="text-xs text-emerald-700/70 dark:text-emerald-500 font-medium">{t("members")}</div>
         </div>
         <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-50 dark:bg-amber-950/20 text-center">
-          <div className="text-2xl font-black text-amber-700 dark:text-amber-400">{GROUPS.length}</div>
+          <div className="text-2xl font-black text-amber-700 dark:text-amber-400">{allGroups.length}</div>
           <div className="text-xs text-amber-700/70 dark:text-amber-500 font-medium">{t("myGroups")}</div>
         </div>
         <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-50 dark:bg-blue-950/20 text-center">
@@ -282,7 +297,7 @@ export const AccountView: React.FC = () => {
               {t("tontineGroupsLabel")}
             </label>
             <div className="flex gap-2 flex-wrap">
-              {GROUPS.map((g) => {
+              {allGroups.map((g) => g.name).map((g) => {
                 const isSelected = form.groups.includes(g);
                 return (
                   <button
@@ -330,7 +345,10 @@ export const AccountView: React.FC = () => {
         </h3>
 
         {members.map((m) => {
-          const rep = MOCK_REPUTATIONS.find((r) => r.memberId === m.id);
+          const originalMember = activeGroup?.members.find((x) => x.id === m.id);
+          const rep = originalMember 
+            ? getOrCreateMemberReputation(originalMember, activeGroup)
+            : getOrCreateMemberReputation({ id: m.id, name: m.name, phone: m.phone, email: m.email, paidCount: 0, totalDue: 0 });
           const isOpen = activeCard === m.id;
           return (
             <div

@@ -314,3 +314,83 @@ export function isMemberBlockedGlobally(memberId: string): boolean {
   return member.level === "blocked" || member.totalPenaltiesOwed > 0;
 }
 
+export function getOrCreateMemberReputation(
+  member: { id: string; name: string; phone: string; email?: string; paidCount: number; totalDue: number },
+  group?: { id: string; name: string; contributionAmount: number; meetings: any[] }
+): MemberReputation {
+  // Check global database matching first
+  const globalRep = MOCK_REPUTATIONS.find((r) => {
+    const cleanPhone = (member.phone || "").replace(/\s+/g, "");
+    const repPhone = (r.identity?.phone || "").replace(/\s+/g, "");
+    const phoneMatch = cleanPhone.length > 5 && repPhone.length > 5 && repPhone.includes(cleanPhone);
+    const emailMatch = !!member.email && !!r.identity?.email && r.identity.email.toLowerCase() === member.email.toLowerCase();
+    const nameMatch = member.name.toLowerCase() === r.memberName.toLowerCase();
+    return phoneMatch || emailMatch || nameMatch;
+  });
+
+  if (globalRep) {
+    return globalRep;
+  }
+
+  // Calculate dynamically for local member
+  let totalOnTime = member.paidCount;
+  let totalLate = 0;
+  let totalUnpaid = member.totalDue > 0 ? 1 : 0;
+
+  if (group) {
+    totalOnTime = 0;
+    totalLate = 0;
+    totalUnpaid = 0;
+    group.meetings.forEach((m: any) => {
+      const contribution = m.contributions.find((c: any) => c.memberId === member.id);
+      if (contribution) {
+        if (contribution.status === "paid") {
+          totalOnTime += 1;
+        } else if (contribution.status === "late") {
+          totalLate += 1;
+        } else if (contribution.status === "pending") {
+          totalUnpaid += 1;
+        }
+      }
+    });
+  }
+
+  // Calculate score starting at 80
+  let score = 80 + (totalOnTime * 5) - (totalLate * 15) - (totalUnpaid * 25);
+  if (score > 100) score = 100;
+  if (score < 0) score = 0;
+
+  const level = getReputationLevel(score);
+
+  // Calculate penalties owed dynamically
+  let totalPenaltiesOwed = 0;
+  if (group) {
+    group.meetings.forEach((m: any) => {
+      const contribution = m.contributions.find((c: any) => c.memberId === member.id);
+      if (contribution && contribution.status === "late") {
+        totalPenaltiesOwed += Math.round(group.contributionAmount * 0.05);
+      }
+    });
+  }
+
+  return {
+    memberId: member.id,
+    memberName: member.name,
+    identity: {
+      phone: member.phone,
+      email: member.email,
+    },
+    score,
+    level,
+    totalGroupsJoined: 1,
+    totalOnTime,
+    totalLate,
+    totalUnpaid,
+    pendingPenalties: [],
+    paidPenalties: [],
+    reputationHistory: [],
+    totalPenaltiesOwed,
+    totalPenaltiesPaid: 0,
+  };
+}
+

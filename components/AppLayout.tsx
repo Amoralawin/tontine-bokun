@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import {
   LayoutDashboard, Users, ShieldAlert, Sparkles, Building2,
   Menu, X, Sun, Moon, ShieldCheck, ChevronRight, UserPlus,
-  Smartphone, Tablet, Laptop, MoreVertical, Tag
+  Smartphone, Tablet, Laptop, MoreVertical, Tag, Trash2
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -40,7 +40,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
   const { theme, setTheme } = useTheme();
   const { t } = useLanguage();
   const { role, setRole, canSeeMembers, canSeeReputation } = useUserRole();
-  const { groups, activeGroupId, setActiveGroupId, activeGroup } = useGroups();
+  const { groups, activeGroupId, setActiveGroupId, activeGroup, deleteGroup } = useGroups();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [deviceMode, setDeviceMode] = useState<"auto" | "mobile" | "tablet">("auto");
@@ -200,16 +200,34 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
               </select>
 
               {/* Member Self-Registration Button */}
-              <button
-                onClick={() => {
-                  setIsJoinModalOpen(true);
-                  setSidebarOpen(false);
-                }}
-                className="w-full mt-2 py-2 px-2.5 rounded-xl btn-mango-gold text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-sm hover:scale-[1.02] transition-all"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>S&apos;inscrire à ce groupe</span>
-              </button>
+              {activeGroup && (
+                <button
+                  onClick={() => {
+                    setIsJoinModalOpen(true);
+                    setSidebarOpen(false);
+                  }}
+                  className="w-full mt-2 py-2 px-2.5 rounded-xl btn-mango-gold text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-sm hover:scale-[1.02] transition-all"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>S&apos;inscrire à ce groupe</span>
+                </button>
+              )}
+
+              {/* Delete Group Button (Admin/Owner Only) */}
+              {activeGroup && (role === "owner" || role === "admin") && (
+                <button
+                  onClick={async () => {
+                    if (window.confirm(`Voulez-vous vraiment supprimer définitivement le groupe "${activeGroup.name}" ? Cette action est irréversible.`)) {
+                      await deleteGroup(activeGroup.id);
+                      setSidebarOpen(false);
+                    }
+                  }}
+                  className="w-full mt-2 py-2 px-2.5 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white font-extrabold text-[10px] uppercase flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Supprimer le groupe</span>
+                </button>
+              )}
             </div>
 
             {/* Navigation Links */}

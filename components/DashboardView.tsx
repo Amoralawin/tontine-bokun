@@ -7,7 +7,7 @@ import { INITIAL_GROUPS, TontineGroup } from "@/lib/mockData";
 import { formatCurrency } from "@/lib/utils";
 import { TTSVoiceReader } from "./TTSVoiceReader";
 import { MemberReputationBadge } from "./MemberReputationBadge";
-import { MOCK_REPUTATIONS } from "@/lib/reputationSystem";
+import { MOCK_REPUTATIONS, getOrCreateMemberReputation } from "@/lib/reputationSystem";
 import { useUserRole } from "@/lib/UserRoleContext";
 import { useGroups } from "@/lib/GroupContext";
 import { toast } from "sonner";
@@ -236,7 +236,7 @@ export const DashboardView: React.FC = () => {
               <div className="space-y-2.5">
                 {meeting.contributions.slice(0, 4).map((c) => {
                   const member = group.members.find((m) => m.id === c.memberId);
-                  const reputation = MOCK_REPUTATIONS.find((r) => r.memberId === c.memberId);
+                  const reputation = member ? getOrCreateMemberReputation(member, group) : undefined;
                   return (
                     <div
                       key={c.memberId}
@@ -297,7 +297,7 @@ export const DashboardView: React.FC = () => {
 
               <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
                 {group.members.map((m) => {
-                  const rep = MOCK_REPUTATIONS.find((r) => r.memberId === m.id);
+                  const rep = getOrCreateMemberReputation(m, group);
                   return (
                     <div
                       key={m.id}
@@ -353,7 +353,7 @@ export const DashboardView: React.FC = () => {
           <div className="space-y-3">
             {meeting.contributions.map((c) => {
               const member = group.members.find((m) => m.id === c.memberId);
-              const reputation = MOCK_REPUTATIONS.find((r) => r.memberId === c.memberId);
+              const reputation = member ? getOrCreateMemberReputation(member, group) : undefined;
               return (
                 <div
                   key={c.memberId}
@@ -442,7 +442,7 @@ export const DashboardView: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {group.members.map((m) => {
-                  const rep = MOCK_REPUTATIONS.find((r) => r.memberId === m.id);
+                  const rep = getOrCreateMemberReputation(m, group);
                   return (
                     <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-950/50">
                       <td className="py-3.5 px-2">

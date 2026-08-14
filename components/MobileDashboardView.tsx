@@ -6,7 +6,7 @@ import { useUserRole } from "@/lib/UserRoleContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import { TTSVoiceReader } from "./TTSVoiceReader";
 import { MemberReputationBadge } from "./MemberReputationBadge";
-import { MOCK_REPUTATIONS } from "@/lib/reputationSystem";
+import { MOCK_REPUTATIONS, getOrCreateMemberReputation } from "@/lib/reputationSystem";
 import { ScheduleMeetingModal } from "./ScheduleMeetingModal";
 import { PaymentCheckoutModal } from "./PaymentCheckoutModal";
 import {
@@ -178,7 +178,7 @@ export const MobileDashboardView: React.FC = () => {
         <div className="space-y-3">
           {meeting?.contributions.map((c) => {
             const member = group.members.find((m) => m.id === c.memberId);
-            const reputation = MOCK_REPUTATIONS.find((r) => r.memberId === c.memberId);
+            const reputation = member ? getOrCreateMemberReputation(member, group) : undefined;
             return (
               <div
                 key={c.memberId}
@@ -250,7 +250,7 @@ export const MobileDashboardView: React.FC = () => {
 
         <div className="space-y-2">
           {group.members.map((m) => {
-            const rep = MOCK_REPUTATIONS.find((r) => r.memberId === m.id);
+            const rep = getOrCreateMemberReputation(m, group);
             return (
               <div
                 key={m.id}
