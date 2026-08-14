@@ -51,20 +51,33 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
+        {/* OpenGraph / Facebook / Instagram / WhatsApp / Telegram */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Tontine bɔkun" />
         <meta property="og:title" content="Tontine bɔkun — Tontine 2.0 Africa" />
-        <meta property="og:description" content="Digitalisez et sécurisez vos tontines en toute confiance. Calcul automatique des cagnottes, rappels WhatsApp et transparence totale." />
+        <meta property="og:description" content="Digitalisez et sécurisez vos tontines en toute confiance. 100% Hors-ligne et Mobile Money." />
         <meta property="og:image" content="https://tontine-bokun-universal.vercel.app/og-image.jpg" />
         <meta property="og:image:secure_url" content="https://tontine-bokun-universal.vercel.app/og-image.jpg" />
         <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:type" content="website" />
+        <meta property="og:image:alt" content="Tontine bɔkun Logo et Plateforme" />
         <meta property="og:url" content="https://tontine-bokun-universal.vercel.app" />
+
+        {/* Twitter / X Large Summary Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://tontine-bokun-universal.vercel.app/og-image.jpg" />
         <meta name="twitter:title" content="Tontine bɔkun — Tontine 2.0 Africa" />
-        <meta name="twitter:description" content="Digitalisez et sécurisez vos tontines en toute confiance." />
+        <meta name="twitter:description" content="Digitalisez et sécurisez vos tontines en toute confiance. 100% Hors-ligne et Mobile Money." />
+        <meta name="twitter:image" content="https://tontine-bokun-universal.vercel.app/og-image.jpg" />
+        <meta name="twitter:image:alt" content="Tontine bɔkun" />
+
+        {/* Snapchat / SMS iMessage / Apple Rich Link Previews */}
         <link rel="image_src" href="https://tontine-bokun-universal.vercel.app/og-image.jpg" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <meta name="apple-mobile-web-app-title" content="Tontine bɔkun" />
+        <meta name="application-name" content="Tontine bɔkun" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
