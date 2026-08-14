@@ -3,6 +3,9 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { OfflineStatusBanner } from "@/components/OfflineStatusBanner";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://tontine-bokun-universal.vercel.app"),
   title: "Tontine bɔkun — Tontine 2.0 Africa | Gestion 100% Hors-Ligne",
