@@ -162,7 +162,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
         <div
           className="flex items-center gap-2 cursor-pointer select-none"
           onClick={handleLogoSecretClick}
-          title="Tontine bɔkun"
         >
           <LogoIcon size={32} />
           <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
@@ -226,7 +225,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
               <div
                 className="flex items-center gap-2.5 cursor-pointer select-none"
                 onClick={handleLogoSecretClick}
-                title="Tontine bɔkun"
               >
                 <LogoIcon size={38} />
                 <div>
