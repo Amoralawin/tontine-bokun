@@ -52,9 +52,10 @@ const WELCOME_TRANSLATIONS: Record<string, Record<string, string>> = {
 export const DashboardView: React.FC = () => {
   const { t, language } = useLanguage();
   const { canSeePenalties, isAdmin } = useUserRole();
-  const { activeGroup: group } = useGroups();
+  const { activeGroup: group, updateContributionStatus, updateMeetingPotProof } = useGroups();
   const [activeTab, setActiveTab] = useState<"overview" | "meeting" | "dues">("overview");
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [previewProofModal, setPreviewProofModal] = useState<{ isOpen: boolean; imageUrl: string; title: string } | null>(null);
 
   const wt = (key: string) => {
     const dict = WELCOME_TRANSLATIONS[language] || WELCOME_TRANSLATIONS.fr;
@@ -76,14 +77,11 @@ export const DashboardView: React.FC = () => {
     );
   }
 
-  const { updateContributionStatus, updateMeetingPotProof } = useGroups();
-  const [previewProofModal, setPreviewProofModal] = useState<{ isOpen: boolean; imageUrl: string; title: string } | null>(null);
-
-  const meeting = group.meetings[0] || {
+  const meeting = group.meetings?.[0] || {
     id: "m-1",
     meetingNumber: 1,
     date: "Aujourd'hui",
-    beneficiaryName: group.members[0]?.name || "Membre",
+    beneficiaryName: group.members?.[0]?.name || "Membre",
     contributions: [],
   };
 

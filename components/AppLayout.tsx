@@ -190,6 +190,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
                 onChange={(e) => setActiveGroupId(e.target.value)}
                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold rounded-xl p-2 text-slate-900 dark:text-white focus:outline-none"
               >
+                {groups.length === 0 && <option value="">(Aucun groupe)</option>}
                 {groups.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
