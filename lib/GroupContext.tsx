@@ -77,7 +77,8 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       if (!dbGroups || dbGroups.length === 0) {
         console.info("Base de données Supabase vide. Prêt pour de nouveaux groupes !");
-        // On peut initialiser avec les groupes vides ou conserver les groupes locaux
+        setGroups([]);
+        setJoinRequests([]);
         return;
       }
 

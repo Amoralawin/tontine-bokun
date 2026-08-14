@@ -24,6 +24,21 @@ export const DashboardView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "meeting" | "dues">("overview");
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
 
+  if (!group) {
+    return (
+      <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-6 max-w-lg mx-auto shadow-md">
+        <div className="text-5xl">👋🏿</div>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white">Bienvenue sur Tontine bɔkun !</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+          Vous n&apos;êtes membre d&apos;aucun groupe pour le moment. Vous pouvez créer votre propre groupe ou demander à en rejoindre un existant depuis l&apos;onglet &quot;Groupes&quot;.
+        </p>
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">
+          💡 La base de données en ligne est connectée ! Tous les groupes que vous créerez maintenant seront réels et enregistrés de manière sécurisée sur Supabase.
+        </div>
+      </div>
+    );
+  }
+
   const meeting = group.meetings[0] || {
     id: "m-1",
     meetingNumber: 1,
