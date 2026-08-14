@@ -27,7 +27,7 @@ const UserRoleContext = createContext<UserRoleContextType>({
 });
 
 export const UserRoleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRole] = useState<UserRole>("admin"); // défaut : admin pour la démo
+  const [role, setRole] = useState<UserRole>("owner");
 
   const isOwner  = role === "owner";
   const isAdmin  = role === "admin" || role === "owner";

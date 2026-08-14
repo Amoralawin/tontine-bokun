@@ -271,19 +271,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
           {/* Sidebar Footer Controls */}
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3 text-xs">
-            <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-              <span className="text-[10px] font-bold text-slate-500 uppercase">{t("viewAs")} (Démo)</span>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
-              >
-                <option value="owner">{t("roleOwner")}</option>
-                <option value="admin">{t("roleAdmin")}</option>
-                <option value="member">{t("roleMember")}</option>
-              </select>
-            </div>
-
             <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                 🌍 Choix de la Langue
