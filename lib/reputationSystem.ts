@@ -318,24 +318,11 @@ export function getOrCreateMemberReputation(
   member: { id: string; name: string; phone: string; email?: string; paidCount: number; totalDue: number },
   group?: { id: string; name: string; contributionAmount: number; meetings: any[] }
 ): MemberReputation {
-  // Check global database matching first
-  const globalRep = MOCK_REPUTATIONS.find((r) => {
-    const cleanPhone = (member.phone || "").replace(/\s+/g, "");
-    const repPhone = (r.identity?.phone || "").replace(/\s+/g, "");
-    const phoneMatch = cleanPhone.length > 5 && repPhone.length > 5 && repPhone.includes(cleanPhone);
-    const emailMatch = !!member.email && !!r.identity?.email && r.identity.email.toLowerCase() === member.email.toLowerCase();
-    const nameMatch = member.name.toLowerCase() === r.memberName.toLowerCase();
-    return phoneMatch || emailMatch || nameMatch;
-  });
-
-  if (globalRep) {
-    return globalRep;
-  }
-
   // Calculate dynamically for local member
   let totalOnTime = member.paidCount;
   let totalLate = 0;
   let totalUnpaid = member.totalDue > 0 ? 1 : 0;
+  let history: any[] = [];
 
   if (group) {
     totalOnTime = 0;
@@ -344,12 +331,34 @@ export function getOrCreateMemberReputation(
     group.meetings.forEach((m: any) => {
       const contribution = m.contributions.find((c: any) => c.memberId === member.id);
       if (contribution) {
+        const dateStr = m.date || new Date().toLocaleDateString("fr-FR");
         if (contribution.status === "paid") {
           totalOnTime += 1;
+          history.push({
+            id: `h-paid-${m.id}`,
+            date: dateStr,
+            type: "on_time",
+            description: `Cotisation payée à temps pour la réunion #${m.meetingNumber}`,
+            scoreChange: 5,
+          });
         } else if (contribution.status === "late") {
           totalLate += 1;
+          history.push({
+            id: `h-late-${m.id}`,
+            date: dateStr,
+            type: "late",
+            description: `Retard de paiement pour la réunion #${m.meetingNumber}`,
+            scoreChange: -15,
+          });
         } else if (contribution.status === "pending") {
           totalUnpaid += 1;
+          history.push({
+            id: `h-unpaid-${m.id}`,
+            date: dateStr,
+            type: "unpaid",
+            description: `Cotisation impayée pour la réunion #${m.meetingNumber}`,
+            scoreChange: -25,
+          });
         }
       }
     });
@@ -360,7 +369,34 @@ export function getOrCreateMemberReputation(
   if (score > 100) score = 100;
   if (score < 0) score = 0;
 
-  const level = getReputationLevel(score);
+  // Check global database matching for overrides
+  const globalRep = MOCK_REPUTATIONS.find((r) => {
+    const cleanPhone = (member.phone || "").replace(/\s+/g, "");
+    const repPhone = (r.identity?.phone || "").replace(/\s+/g, "");
+    const phoneMatch = cleanPhone.length > 5 && repPhone.length > 5 && repPhone.includes(cleanPhone);
+    const emailMatch = !!member.email && !!r.identity?.email && r.identity.email.toLowerCase() === member.email.toLowerCase();
+    const nameMatch = member.name.toLowerCase() === r.memberName.toLowerCase();
+    return phoneMatch || emailMatch || nameMatch;
+  });
+
+  let level = getReputationLevel(score);
+  let blockedReason = undefined;
+  let unblockRequestPending = false;
+
+  if (globalRep) {
+    if (globalRep.level === "blocked" || globalRep.level === "restricted") {
+      level = globalRep.level;
+      blockedReason = globalRep.blockedReason;
+      unblockRequestPending = !!globalRep.unblockRequestPending;
+      if (globalRep.level === "blocked") {
+        score = Math.min(score, 30);
+      }
+    }
+    // Merge mock history to show a full timeline
+    if (globalRep.reputationHistory && globalRep.reputationHistory.length > 0) {
+      history = [...history, ...globalRep.reputationHistory];
+    }
+  }
 
   // Calculate penalties owed dynamically
   let totalPenaltiesOwed = 0;
@@ -382,15 +418,17 @@ export function getOrCreateMemberReputation(
     },
     score,
     level,
-    totalGroupsJoined: 1,
+    totalGroupsJoined: globalRep ? globalRep.totalGroupsJoined : 1,
     totalOnTime,
     totalLate,
     totalUnpaid,
-    pendingPenalties: [],
-    paidPenalties: [],
-    reputationHistory: [],
-    totalPenaltiesOwed,
-    totalPenaltiesPaid: 0,
+    pendingPenalties: globalRep ? globalRep.pendingPenalties : [],
+    paidPenalties: globalRep ? globalRep.paidPenalties : [],
+    reputationHistory: history,
+    totalPenaltiesOwed: totalPenaltiesOwed || (globalRep ? globalRep.totalPenaltiesOwed : 0),
+    totalPenaltiesPaid: globalRep ? globalRep.totalPenaltiesPaid : 0,
+    blockedReason,
+    unblockRequestPending,
   };
 }
 
