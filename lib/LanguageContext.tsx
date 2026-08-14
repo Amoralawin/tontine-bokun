@@ -5,7 +5,7 @@ import { LanguageCode, LANGUAGES, TRANSLATIONS } from "./i18n";
 
 interface LanguageContextType {
   language: LanguageCode;
-  setLanguage: (lang: LanguageCode) => void;
+  setLanguage: (lang: LanguageCode | "auto") => void;
   t: (key: string) => string;
   detectedRegionName?: string;
   isAutoDetected: boolean;
@@ -23,15 +23,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [detectedRegionName, setDetectedRegionName] = useState<string>("");
   const [isAutoDetected, setIsAutoDetected] = useState<boolean>(false);
 
-  useEffect(() => {
-    // Check saved preference
-    const saved = localStorage.getItem("tb_lang") as LanguageCode;
-    if (saved && TRANSLATIONS[saved]) {
-      setLanguageState(saved);
-      return;
-    }
-
-    // Auto-detect based on timezone or browser language
+  const detectLanguage = () => {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       if (tz.includes("Abidjan") || tz.includes("Ivory") || tz.includes("Yamoussoukro")) {
@@ -44,16 +36,40 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setIsAutoDetected(true);
       } else if (navigator.language.startsWith("en")) {
         setLanguageState("en");
+        setIsAutoDetected(true);
+        setDetectedRegionName("Région Anglophone");
+      } else {
+        setLanguageState("fr");
+        setIsAutoDetected(true);
+        setDetectedRegionName("Région Francophone");
       }
     } catch {
       setLanguageState("fr");
+      setIsAutoDetected(false);
     }
+  };
+
+  useEffect(() => {
+    // Check saved preference
+    const saved = localStorage.getItem("tb_lang") as LanguageCode;
+    if (saved && TRANSLATIONS[saved]) {
+      setLanguageState(saved);
+      return;
+    }
+
+    // Auto-detect based on timezone or browser language
+    detectLanguage();
   }, []);
 
-  const setLanguage = (lang: LanguageCode) => {
-    setLanguageState(lang);
-    localStorage.setItem("tb_lang", lang);
-    setIsAutoDetected(false);
+  const setLanguage = (lang: LanguageCode | "auto") => {
+    if (lang === "auto") {
+      localStorage.removeItem("tb_lang");
+      detectLanguage();
+    } else {
+      setLanguageState(lang);
+      localStorage.setItem("tb_lang", lang);
+      setIsAutoDetected(false);
+    }
   };
 
   const t = (key: string): string => {
