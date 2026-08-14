@@ -1,4 +1,4 @@
-const CACHE_NAME = "tontine-bokun-v3";
+const CACHE_NAME = "tontine-bokun-v4";
 const ASSETS_TO_CACHE = [
   "/",
   "/manifest.json",
