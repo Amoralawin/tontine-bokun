@@ -108,7 +108,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
   const navItems = [
     { id: "dashboard", label: t("dashboard"), icon: LayoutDashboard },
-    { id: "owner", label: t("ownerTab"), icon: Crown },
+    { id: "owner", label: t("ownerTab") || "👑 Espace Propriétaire", icon: Crown },
     { id: "groups", label: t("groupsTab"), icon: Building2 },
     ...(canSeeReputation ? [{ id: "reputation", label: t("reputationTab"), icon: ShieldAlert }] : []),
     ...(canSeeMembers ? [{ id: "account", label: t("accountTab"), icon: Users }] : []),
@@ -228,7 +228,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
                 className="w-full mt-2 py-2 px-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
               >
                 <Plus className="w-3.5 h-3.5 text-amber-500" />
-                <span>+ Nouveau Groupe</span>
+                <span>Nouveau Groupe</span>
               </button>
 
               {/* Member Self-Registration Button */}
