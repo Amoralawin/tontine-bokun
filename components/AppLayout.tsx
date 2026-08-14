@@ -176,7 +176,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
               </div>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white lg:hidden"
               >
                 <X className="w-4 h-4" />
               </button>
