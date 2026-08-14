@@ -28,6 +28,13 @@ export default function RootLayout({
                 e.preventDefault();
                 window.deferredPrompt = e;
               });
+              if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(regs) {
+                  for (let r of regs) {
+                    r.update();
+                  }
+                });
+              }
             `,
           }}
         />
