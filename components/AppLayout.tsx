@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import {
   LayoutDashboard, Users, ShieldAlert, Sparkles, Building2,
   Menu, X, Sun, Moon, ShieldCheck, ChevronRight, UserPlus,
-  Smartphone, Tablet, Laptop, MoreVertical, Tag, Trash2
+  Smartphone, Tablet, Laptop, MoreVertical, Tag, Trash2, Download
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -45,10 +45,35 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [deviceMode, setDeviceMode] = useState<"auto" | "mobile" | "tablet">("auto");
   const [mounted, setMounted] = React.useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallTips, setShowInstallTips] = useState(false);
 
   React.useEffect(() => {
     setMounted(true);
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    };
   }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        setDeferredPrompt(null);
+      }
+    } else {
+      setShowInstallTips(true);
+    }
+  };
 
   const roleLabels: Record<UserRole, string> = {
     owner: t("roleOwner"),
@@ -119,6 +144,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
         <div className="flex items-center gap-2">
           <LanguageSelector />
+
+          {/* Bouton Télécharger PWA App */}
+          <button
+            onClick={handleInstallClick}
+            className="p-2 rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-slate-950 transition-colors shrink-0"
+            title="Télécharger l'application"
+          >
+            <Download className="w-5 h-5" />
+          </button>
 
           {/* Bouton Changer Thème (Clair ☀️ / Sombre 🌙) */}
           <button
@@ -257,6 +291,17 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
                 );
               })}
             </nav>
+
+            {/* Install PWA App Button */}
+            <div className="pt-2">
+              <button
+                onClick={handleInstallClick}
+                className="w-full py-2.5 px-3 rounded-xl border-2 border-dashed border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-xs flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+              >
+                <Download className="w-4 h-4 text-amber-500" />
+                <span>Télécharger l&apos;application</span>
+              </button>
+            </div>
           </div>
 
           {/* Sidebar Footer Controls */}
@@ -321,6 +366,49 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
       {/* Member Self-Registration Modal */}
       <JoinGroupModal group={activeGroup} isOpen={isJoinModalOpen} onClose={() => setIsJoinModalOpen(false)} />
+
+      {/* PWA Install Instructions Modal */}
+      {showInstallTips && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl max-w-md w-full space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <Download className="w-5 h-5 text-amber-500" />
+                Installer l&apos;application
+              </h3>
+              <button
+                onClick={() => setShowInstallTips(false)}
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="text-xs text-slate-600 dark:text-slate-300 space-y-3 font-medium">
+              <p>Vous pouvez ajouter <strong>Tontine bɔkun</strong> sur l&apos;écran d&apos;accueil de votre appareil pour l&apos;utiliser comme une application native hors-ligne (PC, Android, iPhone, Tablette).</p>
+              
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2">
+                <p className="font-bold text-amber-700 dark:text-amber-400">📱 Sur iPhone / iPad (Safari) :</p>
+                <ol className="list-decimal list-inside space-y-1 pl-1">
+                  <li>Appuyez sur le bouton de Partage <span className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-black">↑</span> en bas de l&apos;écran.</li>
+                  <li>Faites défiler vers le bas et sélectionnez <span className="font-bold">&quot;Sur l&apos;écran d&apos;accueil&quot;</span>.</li>
+                  <li>Validez pour installer l&apos;icône sur votre téléphone.</li>
+                </ol>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 space-y-2">
+                <p className="font-bold text-blue-700 dark:text-blue-400">🤖 Sur Android (Chrome) / PC :</p>
+                <p>Cliquez sur les <span className="font-bold">3 petits points</span> du navigateur en haut à droite, puis sélectionnez <span className="font-bold">&quot;Installer l&apos;application&quot;</span> ou <span className="font-bold">&quot;Ajouter à l&apos;écran d&apos;accueil&quot;</span>.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowInstallTips(false)}
+              className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-colors"
+            >
+              D&apos;accord, j&apos;ai compris
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
