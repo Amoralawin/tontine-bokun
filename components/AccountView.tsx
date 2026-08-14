@@ -231,7 +231,7 @@ export const AccountView: React.FC = () => {
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="Ex: Amina Koné"
+                placeholder="Ex: Kouamé Koffi"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
               />
             </div>
@@ -344,7 +344,16 @@ export const AccountView: React.FC = () => {
           Membres enregistrés ({members.length})
         </h3>
 
-        {members.map((m) => {
+        {members.length === 0 ? (
+          <div className="p-8 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2.5">
+            <div className="text-3xl">👥</div>
+            <div className="text-sm font-bold text-slate-800 dark:text-white">Aucun membre enregistré pour le moment</div>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Cliquez sur &quot;Nouveau membre&quot; en haut pour ajouter votre premier membre ou partagez le lien d&apos;inscription !
+            </p>
+          </div>
+        ) : (
+          members.map((m) => {
           const originalMember = activeGroup?.members.find((x) => x.id === m.id);
           const rep = originalMember 
             ? getOrCreateMemberReputation(originalMember, activeGroup)
@@ -416,7 +425,7 @@ export const AccountView: React.FC = () => {
               )}
             </div>
           );
-        })}
+        }))}
       </div>
     </div>
   );
