@@ -86,14 +86,53 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        setDeferredPrompt(null);
+      try {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          setDeferredPrompt(null);
+          toast.success("Application installée avec succès !");
+          return;
+        }
+      } catch (e) {
+        // fallback to direct modal
       }
-    } else {
-      setShowInstallTips(true);
     }
+    setShowInstallTips(true);
+  };
+
+  const handleDownloadAppFile = () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tontine bɔkun — Application</title>
+  <link rel="icon" href="https://tontine-bokun-universal.vercel.app/icon-192.png">
+  <meta http-equiv="refresh" content="0; url=https://tontine-bokun-universal.vercel.app">
+  <script>window.location.replace("https://tontine-bokun-universal.vercel.app");</script>
+  <style>
+    body { background: #0b132b; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+    .btn { background: #f59e0b; color: #0b132b; padding: 14px 28px; border-radius: 16px; font-weight: bold; text-decoration: none; font-size: 16px; display: inline-block; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>🪙 Ouverture de Tontine bɔkun...</h2>
+  <p>Redirection vers votre application sécurisée en cours.</p>
+  <a href="https://tontine-bokun-universal.vercel.app" class="btn">Ouvrir Tontine bɔkun</a>
+</body>
+</html>`;
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Tontine-bokun.html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("📥 Fichier d'application téléchargé avec succès !");
+    setShowInstallTips(false);
   };
 
   const handleForceRefresh = async () => {
@@ -458,55 +497,71 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, activeTab, setAc
         </div>
       )}
 
-      {/* PWA Install Instructions Modal */}
+      {/* PWA Direct Install & Download Modal */}
       {showInstallTips && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
-          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl max-w-md w-full space-y-4">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-[999] flex items-center justify-center p-4">
+          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl max-w-md w-full space-y-6 text-center animate-fade-up">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <Download className="w-5 h-5 text-amber-500" />
-                Installer l&apos;application
-              </h3>
+              <div className="flex items-center gap-2.5">
+                <LogoIcon size={36} />
+                <span className="font-extrabold text-base text-slate-900 dark:text-white">
+                  Tontine <span className="text-amber-500 font-black">bɔkun</span>
+                </span>
+              </div>
               <button
                 onClick={() => setShowInstallTips(false)}
                 className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="text-xs text-slate-600 dark:text-slate-300 space-y-3 font-medium">
-              <p>Vous pouvez ajouter <strong>Tontine bɔkun</strong> sur l&apos;écran d&apos;accueil de votre appareil pour l&apos;utiliser comme une application native hors-ligne (PC, Android, iPhone, Tablette).</p>
-              
-              <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 space-y-2">
-                <p className="font-bold text-blue-700 dark:text-blue-400">💻 Sur PC / Mac (Chrome / Edge) :</p>
-                <ol className="list-decimal list-inside space-y-1 pl-1">
-                  <li>Regardez dans la <strong>barre d&apos;adresse</strong> tout en haut à droite (à côté de l&apos;étoile).</li>
-                  <li>Cliquez sur l&apos;icône <strong>📥 Installer l&apos;application</strong>.</li>
-                  <li>Ou cliquez sur le menu <strong>(···)</strong> en haut à droite &gt; <strong>&quot;Applications&quot;</strong> &gt; <strong>&quot;Installer Tontine bɔkun&quot;</strong>.</li>
-                </ol>
-              </div>
 
-              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
-                <p className="font-bold text-emerald-700 dark:text-emerald-400">🤖 Sur Android (Chrome) :</p>
-                <ol className="list-decimal list-inside space-y-1 pl-1">
-                  <li>Appuyez sur les <strong>3 petits points</strong> en haut à droite du navigateur.</li>
-                  <li>Sélectionnez <strong>&quot;Installer l&apos;application&quot;</strong> ou <strong>&quot;Ajouter à l&apos;écran d&apos;accueil&quot;</strong>.</li>
-                </ol>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2">
-                <p className="font-bold text-amber-700 dark:text-amber-400">📱 Sur iPhone / iPad (Safari) :</p>
-                <ol className="list-decimal list-inside space-y-1 pl-1">
-                  <li>Appuyez sur le bouton de Partage <span className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-black">↑</span> en bas de l&apos;écran.</li>
-                  <li>Faites défiler vers le bas et sélectionnez <span className="font-bold">&quot;Sur l&apos;écran d&apos;accueil&quot;</span>.</li>
-                </ol>
-              </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                Télécharger / Installer l&apos;application
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                Accédez à vos tontines directement depuis l&apos;écran de votre téléphone ou bureau PC en 1 clic.
+              </p>
             </div>
+
+            <div className="space-y-3">
+              {/* Option 1: Direct PWA Install */}
+              <button
+                onClick={async () => {
+                  if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === "accepted") {
+                      setDeferredPrompt(null);
+                      setShowInstallTips(false);
+                      toast.success("Application installée avec succès !");
+                    }
+                  } else {
+                    handleDownloadAppFile();
+                  }
+                }}
+                className="w-full py-4 px-4 rounded-2xl btn-mango-gold text-slate-950 font-black text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02]"
+              >
+                <Smartphone className="w-5 h-5" />
+                <span>📲 Installer sur cet appareil (1 Clic)</span>
+              </button>
+
+              {/* Option 2: Direct File Download */}
+              <button
+                onClick={handleDownloadAppFile}
+                className="w-full py-3 px-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-amber-500/50 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+              >
+                <Download className="w-4 h-4 text-amber-500" />
+                <span>📥 Télécharger le fichier application (.html)</span>
+              </button>
+            </div>
+
             <button
               onClick={() => setShowInstallTips(false)}
-              className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-colors shadow-lg"
+              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline font-medium"
             >
-              D&apos;accord, j&apos;ai compris
+              Fermer
             </button>
           </div>
         </div>
