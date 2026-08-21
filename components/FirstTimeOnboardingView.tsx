@@ -67,10 +67,12 @@ const ONBOARDING_I18N: Record<string, Record<string, string>> = {
     step2Tag: "Étape 2",
     step2Title: "Pointez les Cotisations en Réunion",
     step2Desc: "Lors de chaque rencontre, cochez en un clic les membres présents qui ont versé leur cotisation. Ajoutez une photo du reçu ou du transfert Mobile Money.",
+    step2Badge: "Reçu de cotisation généré immédiatement !",
     
     step3Tag: "Étape 3",
     step3Title: "Célébrez la Remise de la Cagnotte",
     step3Desc: "L'application génère automatiquement le Trophée du Bénéficiaire avec le montant total collecté, prêt à être partagé avec fierté au groupe !",
+    step3Badge: "Trophée officiel de la cagnotte remis au bénéficiaire !",
     
     // Call to Action
     ctaTitle: "Prêt à démarrer l'aventure ?",
@@ -115,10 +117,12 @@ const ONBOARDING_I18N: Record<string, Record<string, string>> = {
     step2Tag: "Step 2",
     step2Title: "Record Contributions at Meetings",
     step2Desc: "At each meeting, check off present members who contributed with 1 click. Add a photo proof or Mobile Money screenshot.",
+    step2Badge: "Instant digital contribution receipt generated!",
     
     step3Tag: "Step 3",
     step3Title: "Celebrate the Pot Payout",
     step3Desc: "The app instantly generates the Beneficiary Trophy with the total collected pot, ready to share with pride to your group!",
+    step3Badge: "Official pot trophy awarded to beneficiary!",
     
     ctaTitle: "Ready to get started?",
     ctaSub: "Choose your starting point in 1 click:",
@@ -162,10 +166,12 @@ const ONBOARDING_I18N: Record<string, Record<string, string>> = {
     step2Tag: "Kwan 2",
     step2Title: "Kplé cɛn sika siesie",
     step2Desc: "Kplé cɛn nun, to nian sran bo be man sika mun.",
+    step2Badge: "Sika wema fite kpa amuan !",
     
     step3Tag: "Kwan 3",
     step3Title: "Sika Kpli Trophy Fite",
     step3Desc: "App fa Trophy kpa man sran bo o nyan sika kpli cɛn lɔ.",
+    step3Badge: "Sika kpli Trophy man sran bo o nyan !",
     
     ctaTitle: "A siesie wun kpa ?",
     ctaSub: "Fa kwan kun di azɔ :",
@@ -209,10 +215,12 @@ const ONBOARDING_I18N: Record<string, Record<string, string>> = {
     step2Tag: "Afɔ 2",
     step2Title: "Akwɛ kplékplé hwenu",
     step2Desc: "Hwenu e mi kplé é, tɛ́ mɛ e su akwɛ lɛ bi tɔn.",
+    step2Badge: "Akwɛ yíyí wema fite azɔ̌n ɖókpó mɛ !",
     
     step3Tag: "Afɔ 3",
     step3Title: "Akwɛ yíyí Trophée",
     step3Desc: "Azɔ̌wema nɔ na Trophée ɖagbe nú mɛ e yí akwɛ bi é.",
+    step3Badge: "Akwɛ yíyí Trophée nú mɛ e ɖu é !",
     
     ctaTitle: "A sɔgbe na bɛ́ azɔ̌ a ?",
     ctaSub: "Sɔ́ afɔɖiɖe towe :",
@@ -248,9 +256,13 @@ const ONBOARDING_I18N: Record<string, Record<string, string>> = {
     step2Tag: "Afɔ 2",
     step2Title: "Akwɛ kplékplé hwenu",
     step2Desc: "Hwenu e mi kplé é, tɛ́ mɛ e su akwɛ lɛ bi tɔn.",
+    step2Badge: "Akwɛ yíyí wema fite azɔ̌n ɖókpó mɛ !",
+    
     step3Tag: "Afɔ 3",
     step3Title: "Akwɛ yíyí Trophée",
     step3Desc: "Azɔ̌wema nɔ na Trophée ɖagbe nú mɛ e yí akwɛ bi é.",
+    step3Badge: "Akwɛ yíyí Trophée nú mɛ e ɖu é !",
+    
     ctaTitle: "A sɔgbe na bɛ́ azɔ̌ a ?",
     ctaSub: "Sɔ́ afɔɖiɖe towe :",
     btnCreate: "Blo gbɛ́tán yɔyɔ́ (Gán)",
@@ -284,9 +296,13 @@ const ONBOARDING_I18N: Record<string, Record<string, string>> = {
     step2Tag: "Afɔ 2",
     step2Title: "Eho kplékplé hwenu",
     step2Desc: "Hwenu e mi kplé é, tɛ́ mɛ e su eho lɛ bi tɔn.",
+    step2Badge: "Eho yíyí wema fite gbesisɔ mɛ !",
+    
     step3Tag: "Afɔ 3",
     step3Title: "Eho yíyí Trophée",
     step3Desc: "Azɔ̌wema nɔ na Trophée nywi nú mɛ e yí eho bi é.",
+    step3Badge: "Eho yíyí Trophée nywi nɔ mɛci yí ɖu é !",
+    
     ctaTitle: "A sɔgbe na bɛ́ azɔ̌ a ?",
     ctaSub: "Sɔ́ afɔɖiɖe towe :",
     btnCreate: "Blo gbɛ́tán yɔyɔ́ (Gán)",
@@ -483,7 +499,7 @@ export const FirstTimeOnboardingView: React.FC = () => {
             </p>
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>Reçu visuel généré automatiquement !</span>
+              <span>{ot("step2Badge")}</span>
             </div>
           </div>
 
@@ -500,7 +516,7 @@ export const FirstTimeOnboardingView: React.FC = () => {
             </p>
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
               <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
-              <span>Trophée WhatsApp du bénéficiaire !</span>
+              <span>{ot("step3Badge")}</span>
             </div>
           </div>
 
