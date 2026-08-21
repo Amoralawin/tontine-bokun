@@ -23,48 +23,21 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [detectedRegionName, setDetectedRegionName] = useState<string>("");
   const [isAutoDetected, setIsAutoDetected] = useState<boolean>(false);
 
-  const detectLanguage = () => {
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (tz.includes("Abidjan") || tz.includes("Ivory") || tz.includes("Yamoussoukro")) {
-        setLanguageState("bci"); // Baoulé (Côte d'Ivoire)
-        setDetectedRegionName("Abidjan, Côte d'Ivoire (Baoulé)");
-        setIsAutoDetected(true);
-      } else if (tz.includes("Porto-Novo") || tz.includes("Cotonou") || tz.includes("Benin")) {
-        setLanguageState("fon"); // Fon (Bénin)
-        setDetectedRegionName("Cotonou / Bénin (Fon)");
-        setIsAutoDetected(true);
-      } else if (navigator.language.startsWith("en")) {
-        setLanguageState("en");
-        setIsAutoDetected(true);
-        setDetectedRegionName("Région Anglophone");
-      } else {
-        setLanguageState("fr");
-        setIsAutoDetected(true);
-        setDetectedRegionName("Région Francophone");
-      }
-    } catch {
-      setLanguageState("fr");
-      setIsAutoDetected(false);
-    }
-  };
-
   useEffect(() => {
     // Check saved preference
     const saved = localStorage.getItem("tb_lang") as LanguageCode;
     if (saved && TRANSLATIONS[saved]) {
       setLanguageState(saved);
-      return;
+    } else {
+      setLanguageState("fr");
     }
-
-    // Auto-detect based on timezone or browser language
-    detectLanguage();
   }, []);
 
   const setLanguage = (lang: LanguageCode | "auto") => {
     if (lang === "auto") {
       localStorage.removeItem("tb_lang");
-      detectLanguage();
+      setLanguageState("fr");
+      setIsAutoDetected(false);
     } else {
       setLanguageState(lang);
       localStorage.setItem("tb_lang", lang);
