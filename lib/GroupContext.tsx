@@ -316,7 +316,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           paid_at: mt.contributions[0].paidAt,
         });
 
-        toast.success(`Le groupe "${name}" est en ligne sur Supabase !`);
+        toast.success(`Le groupe "${name}" a été créé avec succès !`);
       }
     } catch (e) {
       console.warn("Échec écriture Supabase :", e);
@@ -407,7 +407,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       status: newRequest.status,
       requested_at: newRequest.requestedAt,
     }).then(({ error }) => {
-      if (!error) toast.success("Demande enregistrée sur la base de données !");
+      if (!error) toast.success("Demande d'adhésion enregistrée avec succès !");
     });
 
     return true;
@@ -467,7 +467,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         });
 
         await supabase.from("join_requests").update({ status: "approved" }).eq("id", requestId);
-        toast.success("Statut synchronisé sur la base de données !");
+        toast.success("Statut mis à jour avec succès !");
       }
     } catch (e) {
       console.warn(e);
@@ -557,7 +557,7 @@ export const GroupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           status: "pending",
         }));
         await supabase.from("contributions").insert(contributionsToInsert);
-        toast.success("Réunion sauvegardée sur Supabase !");
+        toast.success("Réunion programmée avec succès !");
       }
     } catch (e) {
       console.warn(e);

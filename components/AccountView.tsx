@@ -70,7 +70,7 @@ export const AccountView: React.FC = () => {
     try {
       const { error } = await supabase.from("members").delete().eq("id", id);
       if (error) {
-        toast.error("Erreur de suppression sur Supabase.");
+        toast.error("Erreur de suppression.");
         return;
       }
       toast.success("Membre supprimé.");
