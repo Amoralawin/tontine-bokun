@@ -17,38 +17,7 @@ import { CreateGroupModal } from "./CreateGroupModal";
 import { MobileDashboardView } from "./MobileDashboardView";
 import { TabletDashboardView } from "./TabletDashboardView";
 
-const WELCOME_TRANSLATIONS: Record<string, Record<string, string>> = {
-  fr: {
-    title: "Bienvenue sur Tontine bɔkun !",
-    desc: "Vous n'êtes membre d'aucun groupe pour le moment. Vous pouvez créer votre propre groupe ou demander à en rejoindre un existant depuis l'onglet \"Groupes\".",
-    notice: "💡 La base de données en ligne est connectée ! Tous les groupes que vous créerez maintenant seront réels et enregistrés de manière sécurisée sur Supabase."
-  },
-  en: {
-    title: "Welcome to Tontine bɔkun!",
-    desc: "You are not a member of any group at the moment. You can create your own group or request to join an existing one from the \"Groups\" tab.",
-    notice: "💡 The online database is connected! All groups you create now will be real and securely saved on Supabase."
-  },
-  bci: {
-    title: "Mo wuo ba Tontine bɔkun!",
-    desc: "A nun fin akpasua fiɛ nun fine. A ko yi akpasua wun, o ko wlu nun akpasua kun lɔ.",
-    notice: "💡 Database su kpli wun fine! Akpasua mɔyo mun bo a ko yi o ko siesie kpa su Supabase."
-  },
-  fon: {
-    title: "Mǐ ɖo azɔ̌ Tontine bɔkun mɛ!",
-    desc: "A ko byɔ gbɛ́tán ɖě mɛ azɔ̌ lɔ mɛ lǎ. A sixu blo gbɛ́tán towe alɔyi.",
-    notice: "💡 Akwɛ jije towe sugan bi! Gbɛ́tán e blo towe ganji mɛ sugan bi Supabase."
-  },
-  gux: {
-    title: "Mǐ ɖo azɔ̌ Tontine bɔkun mɛ!",
-    desc: "A ko byɔ gbɛ́tán ɖě mɛ azɔ̌ lɔ mɛ lǎ. A sixu blo gbɛ́tán towe alɔyi.",
-    notice: "💡 Akwɛ jije towe sugan bi! Gbɛ́tán e blo towe ganji mɛ sugan bi Supabase."
-  },
-  ajg: {
-    title: "Wuleva ba Tontine bɔkun!",
-    desc: "Agbetan ma wlu gbɛ́ ɖe mɛ o. A wawa gbɛ́ yɔyɔ́ alokan si.",
-    notice: "💡 Ho kodo base bi te bi! Gbɛ́ ciwo yí a wawa wlán do Supabase."
-  }
-};
+import { FirstTimeOnboardingView } from "./FirstTimeOnboardingView";
 
 export const DashboardView: React.FC = () => {
   const { t, language } = useLanguage();
@@ -59,37 +28,8 @@ export const DashboardView: React.FC = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [previewProofModal, setPreviewProofModal] = useState<{ isOpen: boolean; imageUrl: string; title: string } | null>(null);
 
-  const wt = (key: string) => {
-    const dict = WELCOME_TRANSLATIONS[language] || WELCOME_TRANSLATIONS.fr;
-    return dict[key] || WELCOME_TRANSLATIONS.fr[key];
-  };
-
   if (!group) {
-    return (
-      <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-6 max-w-lg mx-auto shadow-md">
-        <div className="text-5xl">👋🏿</div>
-        <h2 className="text-2xl font-black text-slate-900 dark:text-white">{wt("title")}</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-          {wt("desc")}
-        </p>
-
-        <div className="pt-2">
-          <button
-            onClick={() => setIsCreateOpen(true)}
-            className="w-full py-3.5 px-4 rounded-2xl btn-mango-gold text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-all"
-          >
-            <Plus className="w-5 h-5 text-slate-950" />
-            <span>Créer mon premier groupe de tontine</span>
-          </button>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed">
-          {wt("notice")}
-        </div>
-
-        <CreateGroupModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
-      </div>
-    );
+    return <FirstTimeOnboardingView />;
   }
 
   const meeting = group.meetings?.[0] || {
